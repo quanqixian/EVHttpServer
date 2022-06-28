@@ -83,7 +83,7 @@ bool EVHttpServer::init(const int port, const std::string ip)
             break;
         }
 
-        if(evhttp_bind_socket(m_eventHttp, ip.c_str(), port) != 0)
+        if(0 != evhttp_bind_socket(m_eventHttp, ip.c_str(), port))
         {
             EVLOG_ERROR(-1, "evhttp_bind_socket failed!");
             ret = false;
@@ -163,36 +163,39 @@ bool EVHttpServer::start(unsigned int threadNum)
 {
     std::lock_guard<std::mutex> locker(m_mutex);
 
-    if((!m_isRunning) && (m_eventHttp != nullptr))
+    if(m_isRunning)
     {
-        /* Create thread pool */
-#if HTTP_SERVER_USE_THREADPOOL
-        if(threadNum < 1)
-        {
-            EVLOG_ERROR(-1, "Create thread pool failed, thread num should >= 1");
-            return false;
-        }
+        EVLOG_ERROR(-1, "Start fail, already started.");
+        return false;
+    }
 
-        m_threadPool = new ThreadPool(threadNum);
-        if(nullptr == m_threadPool)
-        {
-            EVLOG_ERROR(-1, "Create thread pool failed!");
-            return false;
-        }
-        EVLOG_INFO("ThreadPool create thread num:%d", threadNum);
+    /* Create thread pool */
+#if HTTP_SERVER_USE_THREADPOOL
+    if(threadNum < 1)
+    {
+        EVLOG_ERROR(-1, "Create thread pool failed, thread num should >= 1");
+        return false;
+    }
+
+    m_threadPool = new ThreadPool(threadNum);
+    if(nullptr == m_threadPool)
+    {
+        EVLOG_ERROR(-1, "Create thread pool failed!");
+        return false;
+    }
+    EVLOG_INFO("ThreadPool create thread num:%d", threadNum);
 #else
-        EVLOG_WARN(0, "Parameter threadNum:%d is useless when the thread pool is not used", threadNum);
+    EVLOG_WARN(0, "Parameter threadNum:%d is useless when the thread pool is not used", threadNum);
 #endif
 
-        /* Create dispatch thread */
-        m_isRunning = true;
+    /* Create dispatch thread */
+    m_isRunning = true;
 
-        m_thread = new std::thread(dispatchThread, this);
-        if(nullptr == m_thread)
-        {
-            EVLOG_ERROR(-1, "Dispatch thread create failed!");
-            m_isRunning = false;
-        }
+    m_thread = new std::thread(dispatchThread, this);
+    if(nullptr == m_thread)
+    {
+        EVLOG_ERROR(-1, "Dispatch thread create failed!");
+        m_isRunning = false;
     }
 
     return m_isRunning;
