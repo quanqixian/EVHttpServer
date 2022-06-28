@@ -348,7 +348,19 @@ bool EVHttpServer::stop()
     if(m_isRunning)
     {
         m_isRunning = false;
+        /*
+         * See http://www.wangafu.net/~nickm/libevent-book/Ref3_eventloop.html
+         *
+         * Note also that event_base_loopexit(base,NULL) and
+         * event_base_loopbreak(base) act differently when no event loop is
+         * running: loopexit schedules the next instance of the event loop to
+         * stop right after the next round of callbacks are run (as if it had
+         * been invoked with EVLOOP_ONCE) whereas loopbreak only stops a
+         * currently running loop, and has no effect if the event loop isn’t
+         * running.
+         */
         event_base_loopbreak(m_base);
+        event_base_loopexit(m_base, nullptr);
 
         if(m_thread)
         {
