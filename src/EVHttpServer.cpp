@@ -213,6 +213,12 @@ bool EVHttpServer::addHandler(UrlAndMethod reqArg, ReqHandler handler, void * ar
 {
     bool ret = true;
 
+    if(nullptr == handler)
+    {
+        EVLOG_ERROR(-1, "Add handler fail, handler is null.");
+        return false;
+    }
+
     std::lock_guard<std::mutex> locker(m_mutex);
 
     if(m_handlerMap.find(reqArg) != m_handlerMap.end())
@@ -231,9 +237,10 @@ bool EVHttpServer::addHandler(UrlAndMethod reqArg, ReqHandler handler, void * ar
 /**
  * @brief      Remove the callback handler corresponding to the http request
  * @param[in]  reqArg : http request parameters, including request method and url, see @ref UrlAndMethod for details 
- * @return     void
+ * @retval     true : success
+ * @retval     false : failed
  */
-void EVHttpServer::rmHandler(UrlAndMethod & reqArg)
+bool EVHttpServer::rmHandler(UrlAndMethod reqArg)
 {
     std::lock_guard<std::mutex> locker(m_mutex);
 
@@ -241,7 +248,10 @@ void EVHttpServer::rmHandler(UrlAndMethod & reqArg)
     if (iter != m_handlerMap.end())
     {
         m_handlerMap.erase(iter);
+        return true;
     }
+
+    return false;
 }
 
 /**
@@ -431,6 +441,12 @@ bool EVHttpServer::addRegHandler(UrlAndMethod reqArg, ReqHandler handler, void *
 {
     std::lock_guard<std::mutex> locker(m_mutex);
 
+    if(nullptr == handler)
+    {
+        EVLOG_ERROR(-1, "Add regex handler fail, handler is null.");
+        return false;
+    }
+
     /*
      * Traverse the linked list, if found to the same method and url description
      * has been inserted before, then failed to insert.
@@ -479,9 +495,10 @@ bool EVHttpServer::addRegHandler(UrlAndMethod reqArg, ReqHandler handler, void *
 /**
  * @brief      Remove the callback function that url supports regular matching
  * @param[in]  reqArg : http request parameters, including request method and url, see @ref UrlAndMethod for details 
- * @return     void
+ * @retval     true : success
+ * @retval     false : failed
  */
-void EVHttpServer::rmRegHandler(UrlAndMethod & reqArg)
+bool EVHttpServer::rmRegHandler(UrlAndMethod reqArg)
 {
     std::lock_guard<std::mutex> locker(m_mutex);
 
@@ -500,7 +517,10 @@ void EVHttpServer::rmRegHandler(UrlAndMethod & reqArg)
         regfree(&iter->reg);
 #endif
         m_regList.erase(iter);
+        return true;
     }
+
+    return false;
 }
 
 /**

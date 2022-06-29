@@ -131,9 +131,9 @@ public:
     bool start(unsigned int threadNum = 1);
     bool stop();
     bool addHandler(UrlAndMethod reqArg, ReqHandler handler, void * arg = nullptr);
-    void rmHandler(UrlAndMethod & reqArg);
+    bool rmHandler(UrlAndMethod reqArg);
     bool addRegHandler(UrlAndMethod reqArg, ReqHandler handler, void * arg = nullptr);
-    void rmRegHandler(UrlAndMethod & reqArg);
+    bool rmRegHandler(UrlAndMethod reqArg);
 private:
     bool deInit();
     static void handleHttpEvent(struct evhttp_request * request, void * arg);

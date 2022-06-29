@@ -47,6 +47,42 @@ TEST(testBasicFunctions, testMultipleCall)
     /* Can not start multiple times */
     EXPECT_EQ(server.start(5), true);
     EXPECT_EQ(server.start(5), false);
+
+    /* Can not add handler for same query multiple times */
+    class Handle
+    {
+    public:
+        static bool handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        {
+            return true;
+        }
+    };
+    EXPECT_EQ(server.addHandler({EVHTTP_REQ_POST, "/api/fun1"}, Handle::handleFunc, nullptr), true);
+    EXPECT_EQ(server.addHandler({EVHTTP_REQ_POST, "/api/fun1"}, Handle::handleFunc, nullptr), false);
+    EXPECT_EQ(server.rmHandler({EVHTTP_REQ_POST, "/api/fun1"}), true);
+    EXPECT_EQ(server.rmHandler({EVHTTP_REQ_POST, "/api/fun1"}), false);
+
+    EXPECT_EQ(server.addRegHandler({EVHTTP_REQ_POST, "/api/fun[1-9]+"}, Handle::handleFunc, nullptr), true);
+    EXPECT_EQ(server.addRegHandler({EVHTTP_REQ_POST, "/api/fun[1-9]+"}, Handle::handleFunc, nullptr), false);
+    EXPECT_EQ(server.rmRegHandler({EVHTTP_REQ_POST, "/api/fun[1-9]+"}), true);
+    EXPECT_EQ(server.rmRegHandler({EVHTTP_REQ_POST, "/api/fun[1-9]+"}), false);
+
+}
+
+/**
+ * @brief Test error argument
+ */
+TEST(testBasicFunctions, testErrorArg)
+{
+    EVHttpServer server;
+
+    /* Test add null handler */
+    EXPECT_EQ(server.addHandler({EVHTTP_REQ_POST, "/api/fun1"}, nullptr, nullptr), false);
+    EXPECT_EQ(server.addRegHandler({EVHTTP_REQ_POST, "/api/fun[1-9]+"}, nullptr, nullptr), false);
+
+    /* Test removal of unadded requests */
+    EXPECT_EQ(server.rmHandler({EVHTTP_REQ_POST, "/api/fun2"}), false);
+    EXPECT_EQ(server.rmRegHandler({EVHTTP_REQ_POST, "/api/fun2[1-9]+"}), false);
 }
 
 #endif
