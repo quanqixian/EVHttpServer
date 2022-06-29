@@ -127,7 +127,7 @@ public:
 public:
     EVHttpServer();
     virtual ~EVHttpServer();
-    bool init(const int port, const std::string ip = "0.0.0.0");
+    bool init(const unsigned int port, const std::string ip = "0.0.0.0");
     bool start(unsigned int threadNum = 1);
     bool stop();
     bool addHandler(UrlAndMethod reqArg, ReqHandler handler, void * arg = nullptr);

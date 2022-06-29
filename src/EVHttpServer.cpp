@@ -25,7 +25,7 @@ EVHttpServer::EVHttpServer()
  * @retval     true : success
  * @retval     false : failed
  */
-bool EVHttpServer::init(const int port, const std::string ip)
+bool EVHttpServer::init(const unsigned int port, const std::string ip)
 {
     bool ret = true;
     std::lock_guard<std::mutex> locker(m_mutex);

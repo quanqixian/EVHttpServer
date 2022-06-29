@@ -1,5 +1,5 @@
-#ifndef _TEST_BASIC_FUNCTIONS_H_
-#define _TEST_BASIC_FUNCTIONS_H_
+#ifndef _TEST_EVHTTP_SERVER_H_
+#define _TEST_EVHTTP_SERVER_H_
 
 #include "EVHttpServer.h"
 #include "gtest/gtest.h"
@@ -7,7 +7,7 @@
 /**
  * @brief test init
  */
-TEST(testBasicFunctions, testInit)
+TEST(testEVHttpServer, testInit)
 {
     EVHttpServer server1;
     EXPECT_EQ(server1.init(9999, "0.0.0.0"), true);
@@ -19,7 +19,7 @@ TEST(testBasicFunctions, testInit)
 /**
  * @brief test start
  */
-TEST(testBasicFunctions, testStart)
+TEST(testEVHttpServer, testStart)
 {
     EVHttpServer server1;
     EXPECT_EQ(server1.init(9999, "0.0.0.0"), true);
@@ -33,7 +33,7 @@ TEST(testBasicFunctions, testStart)
 /**
  * @brief test stop
  */
-TEST(testBasicFunctions, testStop)
+TEST(testEVHttpServer, testStop)
 {
     EVHttpServer server;
     EXPECT_EQ(server.init(9999, "0.0.0.0"), true);
@@ -44,7 +44,7 @@ TEST(testBasicFunctions, testStop)
 /**
  * @brief Test multiple calls to the same function
  */
-TEST(testBasicFunctions, testMultipleCall)
+TEST(testEVHttpServer, testMultipleCall)
 {
     EVHttpServer server;
 
@@ -86,9 +86,9 @@ TEST(testBasicFunctions, testMultipleCall)
 }
 
 /**
- * @brief Test error argument
+ * @brief Test handler related functions
  */
-TEST(testBasicFunctions, testErrorArg)
+TEST(testEVHttpServer, testHandlerFunctions)
 {
     EVHttpServer server;
 
