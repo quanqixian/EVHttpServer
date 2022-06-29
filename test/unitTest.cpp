@@ -1,4 +1,5 @@
 #include "testEVHttpServer.h"
+#include "testHttpReq.h"
 
 int main(int argc, char **argv)
 {
