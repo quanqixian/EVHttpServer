@@ -71,10 +71,10 @@ public:
         std::string body() const;
 
         void headers(std::list<HttpKeyVal> & ret) const;
-        bool findHeader(const std::string & key, std::string & value) const;
+        bool findHeader(const std::string key, std::string & value) const;
 
         void querys(std::list<HttpKeyVal> & ret) const;
-        bool findQuery(std::string key, std::string & value) const;
+        bool findQuery(const std::string key, std::string & value) const;
     private:
         HttpReq(const HttpReq &) = delete;
         HttpReq & operator = (const HttpReq &) = delete;

@@ -655,7 +655,7 @@ void EVHttpServer::HttpReq::headers(std::list<HttpKeyVal> & ret) const
  * @retval     true : find success
  * @retval     false : not found
  */
-bool EVHttpServer::HttpReq::findHeader(const std::string & key, std::string & value) const
+bool EVHttpServer::HttpReq::findHeader(const std::string key, std::string & value) const
 {
     struct evkeyvalq * headers = evhttp_request_get_input_headers(m_request);
     const char * pVal = evhttp_find_header(headers, key.c_str());
@@ -707,7 +707,7 @@ void EVHttpServer::HttpReq::querys(std::list<HttpKeyVal> & ret) const
  * @retval     true : find success
  * @retval     false : not found
  */
-bool EVHttpServer::HttpReq::findQuery(std::string key, std::string & value) const
+bool EVHttpServer::HttpReq::findQuery(const std::string key, std::string & value) const
 {
     const char * uri = evhttp_request_get_uri(m_request);
     struct evhttp_uri * evhttpUri = evhttp_uri_parse(uri);
