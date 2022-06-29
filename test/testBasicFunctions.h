@@ -5,13 +5,29 @@
 #include "gtest/gtest.h"
 
 /**
- * @brief test auto release resources
+ * @brief test init
  */
-TEST(testBasicFunctions, testAutoReleaseResources)
+TEST(testBasicFunctions, testInit)
 {
-    EVHttpServer server;
-    EXPECT_EQ(server.init(9999, "0.0.0.0"), true);
-    EXPECT_EQ(server.start(5), true);
+    EVHttpServer server1;
+    EXPECT_EQ(server1.init(9999, "0.0.0.0"), true);
+
+    EVHttpServer server2;
+    EXPECT_EQ(server2.init(8888), true);
+}
+
+/**
+ * @brief test start
+ */
+TEST(testBasicFunctions, testStart)
+{
+    EVHttpServer server1;
+    EXPECT_EQ(server1.init(9999, "0.0.0.0"), true);
+    EXPECT_EQ(server1.start(), true);
+
+    EVHttpServer server2;
+    EXPECT_EQ(server2.init(8888), true);
+    EXPECT_EQ(server2.start(5), true);
 }
 
 /**
@@ -57,6 +73,7 @@ TEST(testBasicFunctions, testMultipleCall)
             return true;
         }
     };
+
     EXPECT_EQ(server.addHandler({EVHTTP_REQ_POST, "/api/fun1"}, Handle::handleFunc, nullptr), true);
     EXPECT_EQ(server.addHandler({EVHTTP_REQ_POST, "/api/fun1"}, Handle::handleFunc, nullptr), false);
     EXPECT_EQ(server.rmHandler({EVHTTP_REQ_POST, "/api/fun1"}), true);
@@ -66,7 +83,6 @@ TEST(testBasicFunctions, testMultipleCall)
     EXPECT_EQ(server.addRegHandler({EVHTTP_REQ_POST, "/api/fun[1-9]+"}, Handle::handleFunc, nullptr), false);
     EXPECT_EQ(server.rmRegHandler({EVHTTP_REQ_POST, "/api/fun[1-9]+"}), true);
     EXPECT_EQ(server.rmRegHandler({EVHTTP_REQ_POST, "/api/fun[1-9]+"}), false);
-
 }
 
 /**
