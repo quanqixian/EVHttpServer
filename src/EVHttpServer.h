@@ -62,8 +62,6 @@ public:
 
     class HttpReq
     {
-        HttpReq(evhttp_request * req);
-        struct evhttp_request * m_request = nullptr;
     public:
         evhttp_cmd_type method() const;
         std::string methodStr() const;
@@ -79,6 +77,8 @@ public:
         HttpReq(const HttpReq &) = delete;
         HttpReq & operator = (const HttpReq &) = delete;
         friend EVHttpServer;
+        HttpReq(evhttp_request * req);
+        struct evhttp_request * m_request = nullptr;
     };
 
     class HttpRes

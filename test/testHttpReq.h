@@ -52,6 +52,33 @@ TEST(testHttpReq, testHttpReq)
             }
             EXPECT_EQ(matchCount, 2);
 
+            std::string query;
+            EXPECT_EQ(req.findQuery("system", value), true);
+            EXPECT_EQ(value, "ubuntu");
+
+            EXPECT_EQ(req.findQuery("test", value), true);
+            EXPECT_EQ(value, "passed");
+
+            EXPECT_EQ(req.findQuery("NoExist", value), false);
+
+            std::list<EVHttpServer::HttpKeyVal> queryList;
+            req.querys(queryList);
+            EXPECT_EQ(queryList.size(), 2);
+
+            matchCount = 0;
+            for(auto iter = queryList.begin(); iter != queryList.end(); ++iter)
+            {
+                if(iter->key == "system")
+                {
+                    matchCount++;
+                }
+                if(iter->key == "test")
+                {
+                    matchCount++;
+                }
+            }
+            EXPECT_EQ(matchCount, 2);
+
             *pFlag = true;
             return true;
         }
@@ -66,6 +93,59 @@ TEST(testHttpReq, testHttpReq)
             std::string body = R"({"name":"tom"})";
             EXPECT_EQ(req.body(), body);
 
+            std::string value;
+            EXPECT_EQ(req.findHeader("Content-Type", value), true);
+            EXPECT_EQ(value, "application/json");
+
+            EXPECT_EQ(req.findHeader("Server", value), true);
+            EXPECT_EQ(value, "Apache");
+
+            EXPECT_EQ(req.findHeader("NoExist", value), false);
+
+            std::list<EVHttpServer::HttpKeyVal> headerList;
+            req.headers(headerList);
+            EXPECT_GT(headerList.size(), 2);
+            int matchCount = 0;
+            for(auto iter = headerList.begin(); iter != headerList.end(); ++iter)
+            {
+                if(iter->key == "Content-Type")
+                {
+                    matchCount++;
+                }
+                if(iter->key == "Server")
+                {
+                    matchCount++;
+                }
+            }
+            EXPECT_EQ(matchCount, 2);
+
+            std::string query;
+            EXPECT_EQ(req.findQuery("system", value), true);
+            EXPECT_EQ(value, "ubuntu");
+
+            EXPECT_EQ(req.findQuery("test", value), true);
+            EXPECT_EQ(value, "passed");
+
+            EXPECT_EQ(req.findQuery("NoExist", value), false);
+
+            std::list<EVHttpServer::HttpKeyVal> queryList;
+            req.querys(queryList);
+            EXPECT_EQ(queryList.size(), 2);
+
+            matchCount = 0;
+            for(auto iter = queryList.begin(); iter != queryList.end(); ++iter)
+            {
+                if(iter->key == "system")
+                {
+                    matchCount++;
+                }
+                if(iter->key == "test")
+                {
+                    matchCount++;
+                }
+            }
+            EXPECT_EQ(matchCount, 2);
+
             *pFlag = true;
             return true;
         }
@@ -77,6 +157,58 @@ TEST(testHttpReq, testHttpReq)
 
             EXPECT_EQ(req.url(), "/api/getHandle");
 
+            std::string value;
+            EXPECT_EQ(req.findHeader("Content-Type", value), true);
+            EXPECT_EQ(value, "application/json");
+
+            EXPECT_EQ(req.findHeader("Server", value), true);
+            EXPECT_EQ(value, "Apache");
+
+            EXPECT_EQ(req.findHeader("NoExist", value), false);
+
+            std::list<EVHttpServer::HttpKeyVal> headerList;
+            req.headers(headerList);
+            EXPECT_GT(headerList.size(), 2);
+            int matchCount = 0;
+            for(auto iter = headerList.begin(); iter != headerList.end(); ++iter)
+            {
+                if(iter->key == "Content-Type")
+                {
+                    matchCount++;
+                }
+                if(iter->key == "Server")
+                {
+                    matchCount++;
+                }
+            }
+            EXPECT_EQ(matchCount, 2);
+
+            std::string query;
+            EXPECT_EQ(req.findQuery("system", value), true);
+            EXPECT_EQ(value, "ubuntu");
+
+            EXPECT_EQ(req.findQuery("test", value), true);
+            EXPECT_EQ(value, "passed");
+
+            EXPECT_EQ(req.findQuery("NoExist", value), false);
+
+            std::list<EVHttpServer::HttpKeyVal> queryList;
+            req.querys(queryList);
+            EXPECT_EQ(queryList.size(), 2);
+
+            matchCount = 0;
+            for(auto iter = queryList.begin(); iter != queryList.end(); ++iter)
+            {
+                if(iter->key == "system")
+                {
+                    matchCount++;
+                }
+                if(iter->key == "test")
+                {
+                    matchCount++;
+                }
+            }
+            EXPECT_EQ(matchCount, 2);
             *pFlag = true;
             return true;
         }
@@ -90,6 +222,59 @@ TEST(testHttpReq, testHttpReq)
 
             std::string body = R"({"name":"tom"})";
             EXPECT_EQ(req.body(), body);
+
+            std::string value;
+            EXPECT_EQ(req.findHeader("Content-Type", value), true);
+            EXPECT_EQ(value, "application/json");
+
+            EXPECT_EQ(req.findHeader("Server", value), true);
+            EXPECT_EQ(value, "Apache");
+
+            EXPECT_EQ(req.findHeader("NoExist", value), false);
+
+            std::list<EVHttpServer::HttpKeyVal> headerList;
+            req.headers(headerList);
+            EXPECT_GT(headerList.size(), 2);
+            int matchCount = 0;
+            for(auto iter = headerList.begin(); iter != headerList.end(); ++iter)
+            {
+                if(iter->key == "Content-Type")
+                {
+                    matchCount++;
+                }
+                if(iter->key == "Server")
+                {
+                    matchCount++;
+                }
+            }
+            EXPECT_EQ(matchCount, 2);
+
+            std::string query;
+            EXPECT_EQ(req.findQuery("system", value), true);
+            EXPECT_EQ(value, "ubuntu");
+
+            EXPECT_EQ(req.findQuery("test", value), true);
+            EXPECT_EQ(value, "passed");
+
+            EXPECT_EQ(req.findQuery("NoExist", value), false);
+
+            std::list<EVHttpServer::HttpKeyVal> queryList;
+            req.querys(queryList);
+            EXPECT_EQ(queryList.size(), 2);
+
+            matchCount = 0;
+            for(auto iter = queryList.begin(); iter != queryList.end(); ++iter)
+            {
+                if(iter->key == "system")
+                {
+                    matchCount++;
+                }
+                if(iter->key == "test")
+                {
+                    matchCount++;
+                }
+            }
+            EXPECT_EQ(matchCount, 2);
 
             *pFlag = true;
             return true;
@@ -106,7 +291,7 @@ TEST(testHttpReq, testHttpReq)
     EXPECT_EQ(server.start(5), true);
 
     flag = false;
-    std::string cmdPost = R"(curl -i "http://0.0.0.0:9999/api/postHandle"  \
+    std::string cmdPost = R"(curl -i "http://0.0.0.0:9999/api/postHandle?system=ubuntu&test=passed"  \
                 -H "Content-Type: application/json" \
                 -H "Server: Apache" \
                 -d "{\"name\":\"tom\"}" -X POST)";
@@ -115,19 +300,28 @@ TEST(testHttpReq, testHttpReq)
     EXPECT_EQ(flag, true);
 
     flag = false;
-    std::string cmdPut = R"(curl -i "http://0.0.0.0:9999/api/putHandle" -d "{\"name\":\"tom\"}" -X PUT)";
+    std::string cmdPut = R"(curl -i "http://0.0.0.0:9999/api/putHandle?system=ubuntu&test=passed" \
+                -H "Content-Type: application/json" \
+                -H "Server: Apache" \
+                -d "{\"name\":\"tom\"}" -X PUT)";
     system(cmdPut.c_str());
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     EXPECT_EQ(flag, true);
     
     flag = false;
-    std::string cmdGet = R"(curl -i "http://0.0.0.0:9999/api/getHandle" -X GET)";
+    std::string cmdGet = R"(curl -i "http://0.0.0.0:9999/api/getHandle?system=ubuntu&test=passed" \
+                -H "Content-Type: application/json" \
+                -H "Server: Apache" \
+                -X GET)";
     system(cmdGet.c_str());
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     EXPECT_EQ(flag, true);
 
     flag = false;
-    std::string cmdDelete = R"(curl -i "http://0.0.0.0:9999/api/deleteHandle" -d "{\"name\":\"tom\"}" -X DELETE)";
+    std::string cmdDelete = R"(curl -i "http://0.0.0.0:9999/api/deleteHandle?system=ubuntu&test=passed" \
+                -H "Content-Type: application/json" \
+                -H "Server: Apache" \
+                -d "{\"name\":\"tom\"}" -X DELETE)";
     system(cmdDelete.c_str());
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     EXPECT_EQ(flag, true);
