@@ -30,7 +30,27 @@ TEST(testHttpReq, testHttpReq)
             EXPECT_EQ(req.findHeader("Content-Type", value), true);
             EXPECT_EQ(value, "application/json");
 
+            EXPECT_EQ(req.findHeader("Server", value), true);
+            EXPECT_EQ(value, "Apache");
+
             EXPECT_EQ(req.findHeader("NoExist", value), false);
+
+            std::list<EVHttpServer::HttpKeyVal> headerList;
+            req.headers(headerList);
+            EXPECT_GT(headerList.size(), 2);
+            int matchCount = 0;
+            for(auto iter = headerList.begin(); iter != headerList.end(); ++iter)
+            {
+                if(iter->key == "Content-Type")
+                {
+                    matchCount++;
+                }
+                if(iter->key == "Server")
+                {
+                    matchCount++;
+                }
+            }
+            EXPECT_EQ(matchCount, 2);
 
             *pFlag = true;
             return true;
@@ -88,6 +108,7 @@ TEST(testHttpReq, testHttpReq)
     flag = false;
     std::string cmdPost = R"(curl -i "http://0.0.0.0:9999/api/postHandle"  \
                 -H "Content-Type: application/json" \
+                -H "Server: Apache" \
                 -d "{\"name\":\"tom\"}" -X POST)";
     system(cmdPost.c_str());
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
