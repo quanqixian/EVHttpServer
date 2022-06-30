@@ -61,22 +61,24 @@ testResult: $(TARGET_COV)
 coverage:$(TARGET_COV)
 	./$(TARGET_COV)
 	$(COV) ./unitTest.cpp
-	lcov -d . -t "QLib Code Coverage"  -o "coverageRaw.info" -b . -c
-	lcov  -e coverageRaw.info  *QLib*  -o coverage.info
+	lcov -d . -t "EVHttpServer"  -o "coverageRaw.info" -b . -c
+	lcov  -e coverageRaw.info  *src* -o coverage.info
 	genhtml -o $(REPORT_DIR) coverage.info
-	rm -f ./*.info
-	rm -f ./*.gcno
-	rm -f ./*.gcda
 	
 .PHONY:$(TARGET_COV)
-$(TARGET_COV): ./unitTest.cpp ../QLib/*.cpp  ./test*.h
+$(TARGET_COV): ./unitTest.cpp ../src/*.cpp  ./test*.h
 	$(CXX) $^ -o $@ -g -std=c++11\
 		$(CXXFLAGS)           \
         -lgtest    \
         -lpthread  \
-        -I../QLib/ \
+		-levent    \
+		-levent_pthreads \
+        -I../src \
         -I../thirdparty/googletest/install/include/ \
-        -L$(GTEST_DIR)
+        -I../thirdparty/libevent/install/include \
+        -L$(GTEST_DIR) \
+		-L$(LIBEVENT_DIR) \
+		-Wl,-rpath='$$ORIGIN:$$ORIGIN/$(LIBEVENT_DIR)'
 
 .PHONY:clean
 clean:
@@ -85,4 +87,7 @@ clean:
 	rm -rf $(HTML_RESULT_FILE_NAME)
 	rm -rf $(XML_RESULT_FILE_NAME)
 	rm -rf $(REPORT_DIR)
+	rm -f ./*.info
+	rm -f ./*.gcno
+	rm -f ./*.gcda
 
