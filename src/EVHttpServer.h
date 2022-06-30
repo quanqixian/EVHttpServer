@@ -87,13 +87,13 @@ public:
         struct evhttp_request * m_request = nullptr;
         bool m_initBody = false;
     public:
-        bool setBody(std::string & body);
-        bool addHeader(HttpKeyVal & header);
+        bool setBody(const std::string & body);
+        bool addHeader(const HttpKeyVal & header);
         bool addHeaders(std::list<HttpKeyVal> & list);
         bool setHeaders(std::list<HttpKeyVal> & list);
 
-        void setCode(int code);
-        void setReason(std::string reason);
+        void setCode(const int & code);
+        void setReason(const std::string & reason);
     private:
         HttpRes(const HttpRes &) = delete;
         HttpRes & operator = (const HttpRes &) = delete;

@@ -750,7 +750,7 @@ EVHttpServer::HttpRes::HttpRes(evhttp_request * req) : m_request(req)
  * @retval     true : set success
  * @retval     false : set failed
  */
-bool EVHttpServer::HttpRes::setBody(std::string & body)
+bool EVHttpServer::HttpRes::setBody(const std::string & body)
 {
     if(m_initBody)
     {
@@ -806,7 +806,7 @@ bool EVHttpServer::HttpRes::addHeaders(std::list<HttpKeyVal> & list)
  * @retval     true : set success
  * @retval     false : set failed
  */
-bool EVHttpServer::HttpRes::addHeader(HttpKeyVal & header)
+bool EVHttpServer::HttpRes::addHeader(const HttpKeyVal & header)
 {
     struct evkeyvalq * headers = evhttp_request_get_output_headers(m_request);
     return (0 == evhttp_add_header(headers, header.key.c_str(), header.value.c_str()));
@@ -817,7 +817,7 @@ bool EVHttpServer::HttpRes::addHeader(HttpKeyVal & header)
  * @param[in] code : the HTTP response code to send
  * @return    void
  */
-void EVHttpServer::HttpRes::setCode(int code)
+void EVHttpServer::HttpRes::setCode(const int & code)
 {
     m_code = code;
 }
@@ -836,7 +836,7 @@ int EVHttpServer::HttpRes::getCode(void) const
  * @param[in] reason : a brief message to send with the response code
  * @return    void
  */
-void EVHttpServer::HttpRes::setReason(std::string reason)
+void EVHttpServer::HttpRes::setReason(const std::string & reason)
 {
     m_reason = reason;
 }
