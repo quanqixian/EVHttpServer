@@ -25,7 +25,7 @@ EVHttpServer::EVHttpServer()
  * @retval     true : success
  * @retval     false : failed
  */
-bool EVHttpServer::init(const unsigned int port, const std::string ip)
+bool EVHttpServer::init(const unsigned int port, const std::string & ip)
 {
     bool ret = true;
     std::lock_guard<std::mutex> locker(m_mutex);
@@ -183,7 +183,7 @@ bool EVHttpServer::start(unsigned int threadNum)
         EVLOG_ERROR(-1, "Create thread pool failed!");
         return false;
     }
-    EVLOG_INFO("ThreadPool create thread num:%d", threadNum);
+    EVLOG_INFO("ThreadPool create thread num:%u", threadNum);
 #else
     EVLOG_WARN(0, "Parameter threadNum:%d is useless when the thread pool is not used", threadNum);
 #endif
@@ -209,7 +209,7 @@ bool EVHttpServer::start(unsigned int threadNum)
  * @retval     true : Add success
  * @retval     false : Add failed
  */
-bool EVHttpServer::addHandler(UrlAndMethod reqArg, ReqHandler handler, void * arg)
+bool EVHttpServer::addHandler(const UrlAndMethod & reqArg, const ReqHandler & handler, void * arg)
 {
     bool ret = true;
 
@@ -240,7 +240,7 @@ bool EVHttpServer::addHandler(UrlAndMethod reqArg, ReqHandler handler, void * ar
  * @retval     true : success
  * @retval     false : failed
  */
-bool EVHttpServer::rmHandler(UrlAndMethod reqArg)
+bool EVHttpServer::rmHandler(const UrlAndMethod & reqArg)
 {
     std::lock_guard<std::mutex> locker(m_mutex);
 
@@ -313,9 +313,6 @@ void EVHttpServer::handleHttpEvent(struct evhttp_request * request, void * arg)
     }
     else
     {
-    #if USE_LINUX_REGEX_API
-        int regRet = 0;
-    #endif
         for(auto iter = pThis->m_regList.begin(); iter != pThis->m_regList.end(); ++iter)
         {
     #if (!USE_LINUX_REGEX_API)
@@ -325,7 +322,7 @@ void EVHttpServer::handleHttpEvent(struct evhttp_request * request, void * arg)
             }
     #else
             /* The effect of regexec is similar to regex_search, not regex_match */
-            regRet = regexec(&iter->reg, reqArg.url.c_str(), 0, nullptr, 0);
+            int regRet = regexec(&iter->reg, reqArg.url.c_str(), 0, nullptr, 0);
             if((0 != regRet) || ( iter->reqArg.method != reqArg.method)) 
             {
                 continue;
@@ -437,7 +434,7 @@ EVHttpServer::~EVHttpServer()
  * @retval     true : Add success
  * @retval     false : Add failed
  */
-bool EVHttpServer::addRegHandler(UrlAndMethod reqArg, ReqHandler handler, void * arg)
+bool EVHttpServer::addRegHandler(const UrlAndMethod & reqArg, const ReqHandler & handler, void * arg)
 {
     std::lock_guard<std::mutex> locker(m_mutex);
 
@@ -467,7 +464,6 @@ bool EVHttpServer::addRegHandler(UrlAndMethod reqArg, ReqHandler handler, void *
 #else
     int ret = 0;
     regex_t reg = {0};
-    char errBuf[256] = {0};
 
     /*
      * REG_EXTENDED
@@ -480,6 +476,7 @@ bool EVHttpServer::addRegHandler(UrlAndMethod reqArg, ReqHandler handler, void *
     ret = regcomp(&reg, reqArg.url.c_str(), REG_EXTENDED | REG_NOSUB);
     if(0 != ret)
     {
+        char errBuf[256] = {0};
         regerror(ret, &reg, errBuf, sizeof(errBuf));
         EVLOG_ERROR(-1, "Fail to regcomp:%s", errBuf);
         return false;
@@ -498,7 +495,7 @@ bool EVHttpServer::addRegHandler(UrlAndMethod reqArg, ReqHandler handler, void *
  * @retval     true : success
  * @retval     false : failed
  */
-bool EVHttpServer::rmRegHandler(UrlAndMethod reqArg)
+bool EVHttpServer::rmRegHandler(const UrlAndMethod & reqArg)
 {
     std::lock_guard<std::mutex> locker(m_mutex);
 
@@ -655,7 +652,7 @@ void EVHttpServer::HttpReq::headers(std::list<HttpKeyVal> & ret) const
  * @retval     true : find success
  * @retval     false : not found
  */
-bool EVHttpServer::HttpReq::findHeader(const std::string key, std::string & value) const
+bool EVHttpServer::HttpReq::findHeader(const std::string & key, std::string & value) const
 {
     struct evkeyvalq * headers = evhttp_request_get_input_headers(m_request);
     const char * pVal = evhttp_find_header(headers, key.c_str());
@@ -707,7 +704,7 @@ void EVHttpServer::HttpReq::querys(std::list<HttpKeyVal> & ret) const
  * @retval     true : find success
  * @retval     false : not found
  */
-bool EVHttpServer::HttpReq::findQuery(const std::string key, std::string & value) const
+bool EVHttpServer::HttpReq::findQuery(const std::string & key, std::string & value) const
 {
     const char * uri = evhttp_request_get_uri(m_request);
     struct evhttp_uri * evhttpUri = evhttp_uri_parse(uri);

@@ -69,10 +69,10 @@ public:
         std::string body() const;
 
         void headers(std::list<HttpKeyVal> & ret) const;
-        bool findHeader(const std::string key, std::string & value) const;
+        bool findHeader(const std::string & key, std::string & value) const;
 
         void querys(std::list<HttpKeyVal> & ret) const;
-        bool findQuery(const std::string key, std::string & value) const;
+        bool findQuery(const std::string & key, std::string & value) const;
     private:
         HttpReq(const HttpReq &) = delete;
         HttpReq & operator = (const HttpReq &) = delete;
@@ -116,7 +116,7 @@ public:
         UrlAndMethod() : method(EVHTTP_REQ_GET)
         {
         }
-        UrlAndMethod(evhttp_cmd_type m, std::string u) : method(m), url(u)
+        UrlAndMethod(evhttp_cmd_type m, const std::string & u) : method(m), url(u)
         {
         }
         bool operator == (const UrlAndMethod & info) const
@@ -127,13 +127,13 @@ public:
 public:
     EVHttpServer();
     virtual ~EVHttpServer();
-    bool init(const unsigned int port, const std::string ip = "0.0.0.0");
+    bool init(const unsigned int port, const std::string & ip = "0.0.0.0");
     bool start(unsigned int threadNum = 1);
     bool stop();
-    bool addHandler(UrlAndMethod reqArg, ReqHandler handler, void * arg = nullptr);
-    bool rmHandler(UrlAndMethod reqArg);
-    bool addRegHandler(UrlAndMethod reqArg, ReqHandler handler, void * arg = nullptr);
-    bool rmRegHandler(UrlAndMethod reqArg);
+    bool addHandler(const UrlAndMethod & reqArg, const ReqHandler & handler, void * arg = nullptr);
+    bool rmHandler(const UrlAndMethod & reqArg);
+    bool addRegHandler(const UrlAndMethod & reqArg, const ReqHandler & handler, void * arg = nullptr);
+    bool rmRegHandler(const UrlAndMethod & reqArg);
 private:
     bool deInit();
     static void handleHttpEvent(struct evhttp_request * request, void * arg);
