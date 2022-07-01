@@ -785,12 +785,11 @@ bool EVHttpServer::HttpRes::setHeaders(std::list<HttpKeyVal> & list)
 bool EVHttpServer::HttpRes::addHeaders(std::list<HttpKeyVal> & list)
 {
     bool ret = true;
-    int evRet = 0;
 
     struct evkeyvalq * headers = evhttp_request_get_output_headers(m_request);
     for(auto iter = list.begin(); iter != list.end(); ++iter)
     {
-        evRet = evhttp_add_header(headers, iter->key.c_str(), iter->value.c_str());
+        int evRet = evhttp_add_header(headers, iter->key.c_str(), iter->value.c_str());
         ret = ret && (0 == evRet);
     }
 

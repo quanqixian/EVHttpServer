@@ -54,7 +54,6 @@ TEST(testHttpRes, testHttpRes)
             }
             EXPECT_EQ(matchCount, 2);
 
-            std::string query;
             EXPECT_EQ(req.findQuery("system", value), true);
             EXPECT_EQ(value, "ubuntu");
 
