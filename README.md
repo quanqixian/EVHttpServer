@@ -1,3 +1,13 @@
-A simple http server implemented with libevent, using c++11 package to implement
-a simpler api, supporting thread pool processing requests, and supporting
-regular matching.
+<p align="center">
+  <img src="./doc/doxygen/Logo.jpg" alt="EVHttpServer logo"/>
+</p>
+
+EVHttpServer是使用c++11对libevent进行封装实现的http server，它提供了：
+
+- 更简单的api
+
+- 使用线程池处理http 请求
+
+- 支持添加正则匹配的url
+
+
