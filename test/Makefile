@@ -63,7 +63,7 @@ coverage:$(TARGET_COV)
 	$(COV) ./unitTest.cpp
 	lcov -d . -t "EVHttpServer"  -o "coverageRaw.info" -b . -c
 	lcov  -e coverageRaw.info  *src* -o coverage.info
-	genhtml -o $(REPORT_DIR) coverage.info
+	genhtml -o $(REPORT_DIR) coverage.info -t "EVHttpServer code coverage"
 	
 .PHONY:$(TARGET_COV)
 $(TARGET_COV): ./unitTest.cpp ../src/*.cpp  ./test*.h
