@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <thread>
+#include <cstring>
 
 /**
  * @brief test class HttpRes
@@ -148,6 +149,7 @@ TEST(testHttpRes, testHttpRes)
             }
             EXPECT_EQ(matchCount, 2);
 
+            res.addHeader({"favouriteFood", "Udon"});
             *pFlag = true;
             return true;
         }
@@ -211,6 +213,7 @@ TEST(testHttpRes, testHttpRes)
                 }
             }
             EXPECT_EQ(matchCount, 2);
+            res.setCode(503);
             *pFlag = true;
             return true;
         }
@@ -302,6 +305,7 @@ TEST(testHttpRes, testHttpRes)
     char buf[256] = {0};
     fread(buf, 1, sizeof(buf) - 1, pFile);
     pclose(pFile);
+    pFile = nullptr;
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     EXPECT_EQ(flag, true);
     EXPECT_EQ(std::string(buf), "hello");
@@ -310,19 +314,33 @@ TEST(testHttpRes, testHttpRes)
     std::string cmdPut = R"(curl -i "http://0.0.0.0:9999/api/putHandle?system=ubuntu&test=passed" \
                 -H "Content-Type: application/json" \
                 -H "Server: Apache" \
-                -d "{\"name\":\"tom\"}" -X PUT)";
-    system(cmdPut.c_str());
+                -d "{\"name\":\"tom\"}" -X PUT | grep "favouriteFood")";
+    pFile = popen(cmdPut.c_str(), "r");
+    ASSERT_NE(pFile, nullptr);
+    memset(buf, 0, sizeof(buf));
+    fread(buf, 1, sizeof(buf) - 1, pFile);
+    pclose(pFile);
+    pFile = nullptr;
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     EXPECT_EQ(flag, true);
+    EXPECT_NE(strstr(buf, "favouriteFood"), nullptr);
+    EXPECT_NE(strstr(buf, "Udon"), nullptr);
     
     flag = false;
     std::string cmdGet = R"(curl -i "http://0.0.0.0:9999/api/getHandle?system=ubuntu&test=passed" \
+                -w "\nhttp_code:%{http_code}\n"\
                 -H "Content-Type: application/json" \
                 -H "Server: Apache" \
                 -X GET)";
-    system(cmdGet.c_str());
+    pFile = popen(cmdGet.c_str(), "r");
+    ASSERT_NE(pFile, nullptr);
+    memset(buf, 0, sizeof(buf));
+    fread(buf, 1, sizeof(buf) - 1, pFile);
+    pclose(pFile);
+    pFile = nullptr;
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     EXPECT_EQ(flag, true);
+    EXPECT_NE(strstr(buf, "http_code:503"), nullptr);
 
     flag = false;
     std::string cmdDelete = R"(curl -i "http://0.0.0.0:9999/api/deleteHandle?system=ubuntu&test=passed" \
