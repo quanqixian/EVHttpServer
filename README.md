@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./doc/doxygen/Logo.jpg" alt="EVHttpServer logo"/>
+  <img src="./doc/doxygen/Logo02.jpg" alt="EVHttpServer logo"/>
 </p>
 
 EVHttpServer是使用c++11对libevent进行封装实现的http server，它提供了：
