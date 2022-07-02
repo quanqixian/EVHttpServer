@@ -1,6 +1,7 @@
 #include "testEVHttpServer.h"
 #include "testHttpReq.h"
 #include "testHttpRes.h"
+#include "testRegexMatch.h"
 
 int main(int argc, char **argv)
 {
