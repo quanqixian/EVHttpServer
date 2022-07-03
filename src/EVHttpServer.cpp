@@ -521,7 +521,8 @@ bool EVHttpServer::rmRegHandler(const UrlAndMethod & reqArg)
 }
 
 /**
- * @brief     Constructor
+ * @brief     Constructor of HttpReq, which is a private 
+ * function and is not allowed to be called externally
  */
 EVHttpServer::HttpReq::HttpReq(evhttp_request * req) : m_request(req)
 {
@@ -734,7 +735,8 @@ bool EVHttpServer::HttpReq::findQuery(const std::string & key, std::string & val
 }
 
 /**
- * @brief      HttpRes Constructor
+ * @brief      Constructor of HttpRes, which is a private function and is not
+ * allowed to be called externally
  */
 EVHttpServer::HttpRes::HttpRes(evhttp_request * req) : m_request(req)
 {
