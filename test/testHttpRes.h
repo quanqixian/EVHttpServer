@@ -413,4 +413,47 @@ TEST(testHttpRes, addHeaders)
     EXPECT_NE(strstr(buf, "Specialty"), nullptr);
     EXPECT_NE(strstr(buf, "Drawing"), nullptr);
 }
+
+/**
+ * @brief test setHeaders
+ */
+TEST(testHttpRes, setHeaders)
+{
+    class Handle
+    {
+    public:
+        static bool putHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        {
+            bool * pFlag = static_cast<bool *>(arg);
+            std::list<EVHttpServer::HttpKeyVal> list;
+            list.push_back({"favouriteFood", "Udon"});
+            list.push_back({"Specialty", "Drawing"});
+            res.setHeaders(list);
+            *pFlag = true;
+            return true; 
+        }
+    };
+
+    volatile bool flag = false;
+    EVHttpServer server;
+    EXPECT_EQ(server.init(9999, "0.0.0.0"), true);
+    EXPECT_EQ(server.addHandler({EVHTTP_REQ_PUT, "/api/putHandle"}, Handle::putHandle, (void *)&flag), true);
+    EXPECT_EQ(server.start(5), true);
+
+    flag = false;
+    char buf[512] = {0};
+    std::string cmdPut = R"(curl -i "http://0.0.0.0:9999/api/putHandle?system=ubuntu&test=passed" \
+                -d "{\"name\":\"tom\"}" -X PUT )";
+    FILE *pFile = popen(cmdPut.c_str(), "r");
+    ASSERT_NE(pFile, nullptr);
+    fread(buf, 1, sizeof(buf) - 1, pFile);
+    pclose(pFile);
+    pFile = nullptr;
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    EXPECT_EQ(flag, true);
+    EXPECT_NE(strstr(buf, "favouriteFood"), nullptr);
+    EXPECT_NE(strstr(buf, "Udon"), nullptr);
+    EXPECT_NE(strstr(buf, "Specialty"), nullptr);
+    EXPECT_NE(strstr(buf, "Drawing"), nullptr);
+}
 #endif
