@@ -361,4 +361,145 @@ TEST(testHttpReq, testBigBody)
 }
 
 
+/**
+ * @brief test methodStr
+ */
+TEST(testHttpReq, methodStr)
+{
+    class Handle
+    {
+    public:
+        static bool postHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        {
+            bool * pFlag = static_cast<bool *>(arg);
+            EXPECT_EQ(req.method(), EVHTTP_REQ_POST);
+            EXPECT_EQ(req.methodStr(), "POST");
+            *pFlag = true;
+            return true;
+        }
+        static bool putHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        {
+            bool * pFlag = static_cast<bool *>(arg);
+            EXPECT_EQ(req.method(), EVHTTP_REQ_PUT);
+            EXPECT_EQ(req.methodStr(), "PUT");
+            *pFlag = true;
+            return true;
+        }
+        static bool getHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        {
+            bool * pFlag = static_cast<bool *>(arg);
+            EXPECT_EQ(req.method(), EVHTTP_REQ_GET);
+            EXPECT_EQ(req.methodStr(), "GET");
+            *pFlag = true;
+            return true;
+        }
+        static bool deleteHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        {
+            bool * pFlag = static_cast<bool *>(arg);
+            EXPECT_EQ(req.method(), EVHTTP_REQ_DELETE);
+            EXPECT_EQ(req.methodStr(), "DELETE");
+            *pFlag = true;
+            return true;
+        }
+        static bool headHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        {
+            bool * pFlag = static_cast<bool *>(arg);
+            EXPECT_EQ(req.method(), EVHTTP_REQ_HEAD);
+            EXPECT_EQ(req.methodStr(), "HEAD");
+            *pFlag = true;
+            return true;
+        }
+        static bool traceHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        {
+            bool * pFlag = static_cast<bool *>(arg);
+            EXPECT_EQ(req.method(), EVHTTP_REQ_TRACE);
+            EXPECT_EQ(req.methodStr(), "TRACE");
+            *pFlag = true;
+            return true;
+        }
+        static bool connectHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        {
+            bool * pFlag = static_cast<bool *>(arg);
+            EXPECT_EQ(req.method(), EVHTTP_REQ_CONNECT);
+            EXPECT_EQ(req.methodStr(), "CONNECT");
+            *pFlag = true;
+            return true;
+        }
+        static bool patchHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        {
+            bool * pFlag = static_cast<bool *>(arg);
+            EXPECT_EQ(req.method(), EVHTTP_REQ_PATCH);
+            EXPECT_EQ(req.methodStr(), "PATCH");
+            *pFlag = true;
+            return true;
+        }
+        static bool optionsHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        {
+            bool * pFlag = static_cast<bool *>(arg);
+            EXPECT_EQ(req.method(), EVHTTP_REQ_OPTIONS);
+            EXPECT_EQ(req.methodStr(), "OPTIONS");
+            *pFlag = true;
+            return true;
+        }
+    };
+
+    volatile bool flag = false;
+    EVHttpServer server;
+    EXPECT_EQ(server.init(9999, "0.0.0.0"), true);
+
+    EXPECT_EQ(server.addHandler({EVHTTP_REQ_POST, "/api/postHandle"}, Handle::postHandle, (void *)&flag), true);
+    EXPECT_EQ(server.addHandler({EVHTTP_REQ_PUT, "/api/putHandle"}, Handle::putHandle, (void *)&flag), true);
+    EXPECT_EQ(server.addHandler({EVHTTP_REQ_GET, "/api/getHandle"}, Handle::getHandle, (void *)&flag), true);
+    EXPECT_EQ(server.addHandler({EVHTTP_REQ_DELETE, "/api/deleteHandle"}, Handle::deleteHandle, (void *)&flag), true);
+
+    EXPECT_EQ(server.addHandler({EVHTTP_REQ_DELETE, "/api/optionsHandle"}, Handle::optionsHandle, (void *)&flag), true);
+    EXPECT_EQ(server.addHandler({EVHTTP_REQ_TRACE, "/api/traceHandle"}, Handle::traceHandle, (void *)&flag), true);
+    EXPECT_EQ(server.addHandler({EVHTTP_REQ_CONNECT, "/api/connectHandle"}, Handle::connectHandle, (void *)&flag), true);
+    EXPECT_EQ(server.addHandler({EVHTTP_REQ_HEAD, "/api/headHandle"}, Handle::headHandle, (void *)&flag), true);
+    EXPECT_EQ(server.addHandler({EVHTTP_REQ_PATCH, "/api/patchHandle"}, Handle::patchHandle, (void *)&flag), true);
+    EXPECT_EQ(server.start(5), true);
+
+    {
+        flag = false;
+        std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/postHandle" -X POST )";
+        system(cmd.c_str());
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        EXPECT_EQ(flag, true);
+    }
+    {
+        flag = false;
+        std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/putHandle" -X PUT )";
+        system(cmd.c_str());
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        EXPECT_EQ(flag, true);
+    }
+    {
+        flag = false;
+        std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/getHandle" -X GET )";
+        system(cmd.c_str());
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        EXPECT_EQ(flag, true);
+    }
+    {
+        flag = false;
+        std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/deleteHandle" -X DELETE )";
+        system(cmd.c_str());
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        EXPECT_EQ(flag, true);
+    }
+    {
+        flag = false;
+        std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/traceHandle" -X TRACE )";
+        system(cmd.c_str());
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        EXPECT_EQ(flag, true);
+    }
+    {
+        flag = false;
+        std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/patchHandle" -X PATCH )";
+        system(cmd.c_str());
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        EXPECT_EQ(flag, true);
+    }
+}
 #endif
