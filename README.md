@@ -1,6 +1,7 @@
 <p align="center">
   <img src="./doc/doxygen/Logo02.jpg" alt="EVHttpServer logo"/>
 </p>
+# Introduction
 
 EVHttpServer is an http server implemented by encapsulating libevent using c++11, It provides:
 
@@ -10,7 +11,8 @@ EVHttpServer is an http server implemented by encapsulating libevent using c++11
 
 - Support regular matching url
 
-  
+
+# Examples 
 
 Here is a simple example using EVHttpServer:
 
@@ -56,3 +58,9 @@ int main(int argc, const char *argv[])
 ```
 
 See more examples [here](./example)
+
+# Use in your project
+
+The first way is to include the source code in the src directory into your project, and then give libevent's header file path, library path and rpath when compiling.
+
+The second way is to use EVHTTPServer compiled as a library.
