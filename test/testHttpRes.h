@@ -80,7 +80,9 @@ TEST(testHttpRes, testHttpRes)
             }
             EXPECT_EQ(matchCount, 2);
 
-            res.setBody("hello");
+            EXPECT_EQ(res.setBody("hello"), true);
+            /* not allow setBody more than once */
+            EXPECT_EQ(res.setBody("world"), false);
             *pFlag = true;
             return true;
         }
@@ -211,6 +213,7 @@ TEST(testHttpRes, testHttpRes)
             }
             EXPECT_EQ(matchCount, 2);
             res.setCode(503);
+            res.setReason("TheReasonIsServiceUnavailable");
             *pFlag = true;
             return true;
         }
@@ -337,6 +340,7 @@ TEST(testHttpRes, testHttpRes)
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     EXPECT_EQ(flag, true);
     EXPECT_NE(strstr(buf, "http_code:503"), nullptr);
+    EXPECT_NE(strstr(buf, "TheReasonIsServiceUnavailable"), nullptr);
 
     flag = false;
     std::string cmdDelete = R"(curl -i "http://0.0.0.0:9999/api/deleteHandle?system=ubuntu&test=passed" \
@@ -347,9 +351,9 @@ TEST(testHttpRes, testHttpRes)
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     EXPECT_EQ(flag, true);
 
-	/* 
-	 * test no register request 
-	 */
+    /*
+     * test no register request 
+     */
     flag = false;
     std::string cmdNoExist = R"(curl -i "http://0.0.0.0:9999/api/noExist" \
                 -w "\nhttp_code:%{http_code}\n"\
@@ -367,4 +371,46 @@ TEST(testHttpRes, testHttpRes)
     EXPECT_NE(strstr(buf, "http_code:404"), nullptr);
 }
 
+/**
+ * @brief test addHeaders
+ */
+TEST(testHttpRes, addHeaders)
+{
+    class Handle
+    {
+    public:
+        static bool putHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        {
+            bool * pFlag = static_cast<bool *>(arg);
+            std::list<EVHttpServer::HttpKeyVal> list;
+            list.push_back({"favouriteFood", "Udon"});
+            list.push_back({"Specialty", "Drawing"});
+            res.addHeaders(list);
+            *pFlag = true;
+            return true; 
+        }
+    };
+
+    volatile bool flag = false;
+    EVHttpServer server;
+    EXPECT_EQ(server.init(9999, "0.0.0.0"), true);
+    EXPECT_EQ(server.addHandler({EVHTTP_REQ_PUT, "/api/putHandle"}, Handle::putHandle, (void *)&flag), true);
+    EXPECT_EQ(server.start(5), true);
+
+    flag = false;
+    char buf[512] = {0};
+    std::string cmdPut = R"(curl -i "http://0.0.0.0:9999/api/putHandle?system=ubuntu&test=passed" \
+                -d "{\"name\":\"tom\"}" -X PUT )";
+    FILE *pFile = popen(cmdPut.c_str(), "r");
+    ASSERT_NE(pFile, nullptr);
+    fread(buf, 1, sizeof(buf) - 1, pFile);
+    pclose(pFile);
+    pFile = nullptr;
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    EXPECT_EQ(flag, true);
+    EXPECT_NE(strstr(buf, "favouriteFood"), nullptr);
+    EXPECT_NE(strstr(buf, "Udon"), nullptr);
+    EXPECT_NE(strstr(buf, "Specialty"), nullptr);
+    EXPECT_NE(strstr(buf, "Drawing"), nullptr);
+}
 #endif
