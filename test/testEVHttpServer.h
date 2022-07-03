@@ -31,7 +31,7 @@ TEST(testEVHttpServer, testStart)
 
     EVHttpServer server3;
     EXPECT_EQ(server3.init(7777), true);
-    EXPECT_EQ(server2.start(0), false);
+    EXPECT_EQ(server3.start(0), false);
 }
 
 /**
