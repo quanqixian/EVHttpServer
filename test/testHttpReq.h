@@ -321,6 +321,44 @@ TEST(testHttpReq, testHttpReq)
     system(cmdDelete.c_str());
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     EXPECT_EQ(flag, true);
+
+    flag = false;
+    std::string cmdNoExist = R"(curl -i "http://0.0.0.0:9999/api/noExist" -X POST)";
+    system(cmdNoExist.c_str());
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    EXPECT_EQ(flag, false);
 }
+
+/**
+ * @brief Test big body
+ */
+TEST(testHttpReq, testBigBody)
+{
+    volatile bool flag = false;
+
+    class Handle
+    {
+    public:
+        static bool handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        {
+            bool * pFlag = static_cast<bool *>(arg);
+            EXPECT_GT(req.body().size(), 1024);
+            *pFlag = true;
+            return true;
+        }
+    };
+
+    EVHttpServer server;
+    EXPECT_EQ(server.init(9999, "0.0.0.0"), true);
+    EXPECT_EQ(server.addHandler({EVHTTP_REQ_POST, "/api/fun"}, Handle::handleFunc, (void *)&flag), true);
+    EXPECT_EQ(server.start(5), true);
+
+    flag = false;
+    std::string cmdPost = R"(curl "http://0.0.0.0:9999/api/fun" -d @./testHttpReq.h  -X POST)";
+    system(cmdPost.c_str());
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    EXPECT_EQ(flag, true);
+}
+
 
 #endif

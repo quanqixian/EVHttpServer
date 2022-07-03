@@ -346,6 +346,25 @@ TEST(testHttpRes, testHttpRes)
     system(cmdDelete.c_str());
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     EXPECT_EQ(flag, true);
+
+	/* 
+	 * test no register request 
+	 */
+    flag = false;
+    std::string cmdNoExist = R"(curl -i "http://0.0.0.0:9999/api/noExist" \
+                -w "\nhttp_code:%{http_code}\n"\
+                -H "Content-Type: application/json" \
+                -H "Server: Apache" \
+                -X GET)";
+    pFile = popen(cmdNoExist.c_str(), "r");
+    ASSERT_NE(pFile, nullptr);
+    memset(buf, 0, sizeof(buf));
+    fread(buf, 1, sizeof(buf) - 1, pFile);
+    pclose(pFile);
+    pFile = nullptr;
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    EXPECT_EQ(flag, false);
+    EXPECT_NE(strstr(buf, "http_code:404"), nullptr);
 }
 
 #endif

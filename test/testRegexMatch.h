@@ -323,4 +323,24 @@ TEST(testRegexMatch, testRegexMatch)
     EXPECT_EQ(flag, true);
 }
 
+/**
+ * @brief Test error regex
+ */
+TEST(testRegexMatch, testErrorRegex)
+{
+    class Handle
+    {
+    public:
+        static bool handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        {
+            return true;
+        }
+    };
+
+    EVHttpServer server;
+
+    /* Test add null handler */
+    EXPECT_EQ(server.addRegHandler({EVHTTP_REQ_POST, "/api/fun]}{["}, Handle::handleFunc, nullptr), false);
+}
+
 #endif
