@@ -6,7 +6,7 @@
 function build()
 {
 	#下载源码
-	git clone --depth 1 --branch v1.12.0 https://github.com/google/googletest.git ./googletest
+	git clone --depth 1 --branch release-1.10.0 https://github.com/google/googletest.git ./googletest
 
 	#创建安装目录install
 	mkdir install
