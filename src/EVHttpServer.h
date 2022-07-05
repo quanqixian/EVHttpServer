@@ -39,6 +39,7 @@
 #endif
 
 /*
+ * evhttp_cmd_type is an enumerated type in libevent. 
  * enum evhttp_cmd_type {
  *    EVHTTP_REQ_GET     = 1 << 0,
  *    EVHTTP_REQ_POST    = 1 << 1,
@@ -62,6 +63,10 @@
 class EVHttpServer
 {
 public:
+    /**
+     * @brief HttpKeyVal is a key-value pair used to 
+     * represent the HTTP head and HTTP Query
+     */
     struct HttpKeyVal
     {
         std::string key;
@@ -126,6 +131,9 @@ public:
 
     using ReqHandler = bool (*)(const HttpReq & req, HttpRes & res, void * arg);/* Define http request callback function type */
 public:
+    /**
+     * @brief Url and method are used to represent an HTTP request 
+     */
     struct UrlAndMethod
     {
         evhttp_cmd_type method;
