@@ -452,7 +452,7 @@ TEST(testHttpReq, methodStr)
     EXPECT_EQ(server.addHandler({EVHTTP_REQ_GET, "/api/getHandle"}, Handle::getHandle, (void *)&flag), true);
     EXPECT_EQ(server.addHandler({EVHTTP_REQ_DELETE, "/api/deleteHandle"}, Handle::deleteHandle, (void *)&flag), true);
 
-    EXPECT_EQ(server.addHandler({EVHTTP_REQ_DELETE, "/api/optionsHandle"}, Handle::optionsHandle, (void *)&flag), true);
+    EXPECT_EQ(server.addHandler({EVHTTP_REQ_OPTIONS, "/api/optionsHandle"}, Handle::optionsHandle, (void *)&flag), true);
     EXPECT_EQ(server.addHandler({EVHTTP_REQ_TRACE, "/api/traceHandle"}, Handle::traceHandle, (void *)&flag), true);
     EXPECT_EQ(server.addHandler({EVHTTP_REQ_CONNECT, "/api/connectHandle"}, Handle::connectHandle, (void *)&flag), true);
     EXPECT_EQ(server.addHandler({EVHTTP_REQ_HEAD, "/api/headHandle"}, Handle::headHandle, (void *)&flag), true);
@@ -510,7 +510,7 @@ TEST(testHttpReq, methodStr)
     }
     {
         flag = false;
-        std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/traceHandle" -X TRACE )";
+        std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/optionsHandle" -X OPTIONS )";
         system(cmd.c_str());
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
         EXPECT_EQ(flag, true);
