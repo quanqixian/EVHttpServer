@@ -23,8 +23,9 @@
     #include "ThreadPool.h"
 #endif
 
-/*
- * Since some compilers are not good at implementing regular expressions in C++11,
+/**
+ * @def   USE_LINUX_REGEX_API
+ * @brief Since some compilers are not good at implementing regular expressions in C++11,
  * Under linux, choose to use the system api to support url regular matching,
  * There is also an option to use the regex support in C++11.
  */
@@ -51,6 +52,13 @@
  *};
  */
 
+/**
+ * @brief EVHttpServer is an http server implemented by encapsulating libevent
+ * using c++11, It provides:
+ * - Simpler api
+ * - Use thread pool to handle http requests
+ * - Support regular matching url
+ */
 class EVHttpServer
 {
 public:
@@ -60,6 +68,11 @@ public:
         std::string value;
     };
 
+    /**
+     * @brief HttpReq is an encapsulation class for http requests, which
+     * provides access to methods and urls
+     * body and other methods. It is not allowed to be created externally.
+     */
     class HttpReq
     {
     public:
@@ -81,6 +94,11 @@ public:
         struct evhttp_request * m_request = nullptr;
     };
 
+    /**
+     * @brief HttpRes is the encapsulation class of http response, which
+     * provides methods for setting body, head, code, etc.
+     * It is not allowed to be created externally.
+     */
     class HttpRes
     {
         HttpRes(evhttp_request * req);
