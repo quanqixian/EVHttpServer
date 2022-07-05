@@ -501,5 +501,19 @@ TEST(testHttpReq, methodStr)
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
         EXPECT_EQ(flag, true);
     }
+    {
+        flag = false;
+        std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/headHandle" -X HEAD --head )";
+        system(cmd.c_str());
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        EXPECT_EQ(flag, true);
+    }
+    {
+        flag = false;
+        std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/traceHandle" -X TRACE )";
+        system(cmd.c_str());
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        EXPECT_EQ(flag, true);
+    }
 }
 #endif
