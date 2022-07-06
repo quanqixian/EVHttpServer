@@ -60,6 +60,6 @@ See more examples [here](./example)
 
 # Use in your project
 
-The first way is to include the source code in the src directory into your project, and then give libevent's header file path, library path and rpath when compiling.
+The first way is to include the source code in the [src](./src) directory into your project, and then give libevent's header file path, library path and rpath when compiling.
 
 The second way is to use EVHTTPServer compiled as a library.

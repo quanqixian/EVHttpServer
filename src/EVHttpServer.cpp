@@ -525,7 +525,6 @@ bool EVHttpServer::rmRegHandler(const UrlAndMethod & reqArg)
  */
 EVHttpServer::HttpReq::HttpReq(evhttp_request * req) : m_request(req)
 {
-
 }
 
 /**
@@ -738,7 +737,6 @@ bool EVHttpServer::HttpReq::findQuery(const std::string & key, std::string & val
  */
 EVHttpServer::HttpRes::HttpRes(evhttp_request * req) : m_request(req)
 {
-
 }
 
 /**
