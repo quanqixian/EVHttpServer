@@ -129,7 +129,7 @@ public:
         friend EVHttpServer;
     };
 
-    using ReqHandler = bool (*)(const HttpReq & req, HttpRes & res, void * arg);/* Define http request callback function type */
+    using ReqHandler = void (*)(const HttpReq & req, HttpRes & res, void * arg);/* Define http request callback function type */
 public:
     /**
      * @brief Url and method are used to represent an HTTP request 

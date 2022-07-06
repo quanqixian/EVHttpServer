@@ -72,9 +72,8 @@ TEST(testEVHttpServer, testMultipleCall)
     class Handle
     {
     public:
-        static bool handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            return true;
         }
     };
 

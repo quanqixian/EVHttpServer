@@ -15,7 +15,7 @@ TEST(testHttpReq, testHttpReq)
     class Handle
     {
     public:
-        static bool postHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void postHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHTTP_REQ_POST);
@@ -79,9 +79,8 @@ TEST(testHttpReq, testHttpReq)
             EXPECT_EQ(matchCount, 2);
 
             *pFlag = true;
-            return true;
         }
-        static bool putHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void putHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHTTP_REQ_PUT);
@@ -145,9 +144,8 @@ TEST(testHttpReq, testHttpReq)
             EXPECT_EQ(matchCount, 2);
 
             *pFlag = true;
-            return true;
         }
-        static bool getHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void getHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHTTP_REQ_GET);
@@ -207,9 +205,8 @@ TEST(testHttpReq, testHttpReq)
             }
             EXPECT_EQ(matchCount, 2);
             *pFlag = true;
-            return true;
         }
-        static bool deleteHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void deleteHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHTTP_REQ_DELETE);
@@ -273,7 +270,6 @@ TEST(testHttpReq, testHttpReq)
             EXPECT_EQ(matchCount, 2);
 
             *pFlag = true;
-            return true;
         }
     };
 
@@ -339,12 +335,11 @@ TEST(testHttpReq, testBigBody)
     class Handle
     {
     public:
-        static bool handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             EXPECT_GT(req.body().size(), 1024);
             *pFlag = true;
-            return true;
         }
     };
 
@@ -369,77 +364,68 @@ TEST(testHttpReq, methodStr)
     class Handle
     {
     public:
-        static bool postHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void postHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHTTP_REQ_POST);
             EXPECT_EQ(req.methodStr(), "POST");
             *pFlag = true;
-            return true;
         }
-        static bool putHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void putHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHTTP_REQ_PUT);
             EXPECT_EQ(req.methodStr(), "PUT");
             *pFlag = true;
-            return true;
         }
-        static bool getHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void getHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHTTP_REQ_GET);
             EXPECT_EQ(req.methodStr(), "GET");
             *pFlag = true;
-            return true;
         }
-        static bool deleteHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void deleteHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHTTP_REQ_DELETE);
             EXPECT_EQ(req.methodStr(), "DELETE");
             *pFlag = true;
-            return true;
         }
-        static bool headHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void headHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHTTP_REQ_HEAD);
             EXPECT_EQ(req.methodStr(), "HEAD");
             *pFlag = true;
-            return true;
         }
-        static bool traceHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void traceHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHTTP_REQ_TRACE);
             EXPECT_EQ(req.methodStr(), "TRACE");
             *pFlag = true;
-            return true;
         }
-        static bool connectHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void connectHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHTTP_REQ_CONNECT);
             EXPECT_EQ(req.methodStr(), "CONNECT");
             *pFlag = true;
-            return true;
         }
-        static bool patchHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void patchHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHTTP_REQ_PATCH);
             EXPECT_EQ(req.methodStr(), "PATCH");
             *pFlag = true;
-            return true;
         }
-        static bool optionsHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void optionsHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHTTP_REQ_OPTIONS);
             EXPECT_EQ(req.methodStr(), "OPTIONS");
             *pFlag = true;
-            return true;
         }
     };
 

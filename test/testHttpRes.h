@@ -17,7 +17,7 @@ TEST(testHttpRes, testHttpRes)
     class Handle
     {
     public:
-        static bool postHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void postHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHTTP_REQ_POST);
@@ -84,9 +84,8 @@ TEST(testHttpRes, testHttpRes)
             /* not allow setBody more than once */
             EXPECT_EQ(res.setBody("world"), false);
             *pFlag = true;
-            return true;
         }
-        static bool putHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void putHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHTTP_REQ_PUT);
@@ -151,9 +150,8 @@ TEST(testHttpRes, testHttpRes)
 
             res.addHeader({"favouriteFood", "Udon"});
             *pFlag = true;
-            return true;
         }
-        static bool getHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void getHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHTTP_REQ_GET);
@@ -215,9 +213,8 @@ TEST(testHttpRes, testHttpRes)
             res.setCode(503);
             res.setReason("TheReasonIsServiceUnavailable");
             *pFlag = true;
-            return true;
         }
-        static bool deleteHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void deleteHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHTTP_REQ_DELETE);
@@ -281,7 +278,6 @@ TEST(testHttpRes, testHttpRes)
             EXPECT_EQ(matchCount, 2);
 
             *pFlag = true;
-            return true;
         }
     };
 
@@ -379,7 +375,7 @@ TEST(testHttpRes, addHeaders)
     class Handle
     {
     public:
-        static bool putHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void putHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             std::list<EVHttpServer::HttpKeyVal> list;
@@ -387,7 +383,6 @@ TEST(testHttpRes, addHeaders)
             list.push_back({"Specialty", "Drawing"});
             res.addHeaders(list);
             *pFlag = true;
-            return true; 
         }
     };
 
@@ -422,7 +417,7 @@ TEST(testHttpRes, setHeaders)
     class Handle
     {
     public:
-        static bool putHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void putHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             std::list<EVHttpServer::HttpKeyVal> list;
@@ -430,7 +425,6 @@ TEST(testHttpRes, setHeaders)
             list.push_back({"Specialty", "Drawing"});
             res.setHeaders(list);
             *pFlag = true;
-            return true; 
         }
     };
 

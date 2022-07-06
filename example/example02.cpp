@@ -32,7 +32,7 @@ void sighandler(int signum)
  * @param[out]
  * @retval
  */
-bool handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
 {
     std::list<EVHttpServer::HttpKeyVal> inList;
     std::cout << "Thread id:" << std::this_thread::get_id() << std::endl;
@@ -77,8 +77,6 @@ bool handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, 
     res.setCode(200);
     res.setReason("OK");
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-    return true;
 }
 
 /**
@@ -87,7 +85,7 @@ bool handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, 
  * @param[out]
  * @retval
  */
-bool handleFunRemoveTest(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+void handleFunRemoveTest(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
 {
     std::cout << "handleFunRemoveTest" << std::endl;
 
@@ -95,8 +93,6 @@ bool handleFunRemoveTest(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRe
     reqArg.method = EVHTTP_REQ_POST;
     reqArg.url = "/api/removeAfterhandle";
     g_server.rmHandler(reqArg);
-
-    return true;
 }
 
 int main(int argc, const char *argv[])

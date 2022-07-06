@@ -29,15 +29,13 @@ void sighandler(int signum)
     g_runFlag = false;
 }
 
-bool func(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+void func(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
 {
     std::cout << req.methodStr() << " " << req.url() << std::endl;
     std::cout << req.body() << std::endl;
 
     res.setBody(R"({"status":"OK"})");
     res.setCode(200);
-
-    return true;
 }
 
 int main(int argc, const char *argv[])

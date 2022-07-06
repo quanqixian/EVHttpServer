@@ -15,7 +15,7 @@ TEST(testRegexMatch, testRegexMatch)
     class Handle
     {
     public:
-        static bool postHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void postHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHTTP_REQ_POST);
@@ -79,9 +79,8 @@ TEST(testRegexMatch, testRegexMatch)
             EXPECT_EQ(matchCount, 2);
 
             *pFlag = true;
-            return true;
         }
-        static bool putHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void putHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHTTP_REQ_PUT);
@@ -145,9 +144,8 @@ TEST(testRegexMatch, testRegexMatch)
             EXPECT_EQ(matchCount, 2);
 
             *pFlag = true;
-            return true;
         }
-        static bool getHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void getHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHTTP_REQ_GET);
@@ -207,9 +205,8 @@ TEST(testRegexMatch, testRegexMatch)
             }
             EXPECT_EQ(matchCount, 2);
             *pFlag = true;
-            return true;
         }
-        static bool deleteHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void deleteHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHTTP_REQ_DELETE);
@@ -273,7 +270,6 @@ TEST(testRegexMatch, testRegexMatch)
             EXPECT_EQ(matchCount, 2);
 
             *pFlag = true;
-            return true;
         }
     };
 
@@ -331,9 +327,8 @@ TEST(testRegexMatch, testErrorRegex)
     class Handle
     {
     public:
-        static bool handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        static void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            return true;
         }
     };
 

@@ -360,7 +360,6 @@ bool EVHttpServer::stop()
         m_isRunning = false;
         /*
          * See http://www.wangafu.net/~nickm/libevent-book/Ref3_eventloop.html
-         *
          * Note also that event_base_loopexit(base,NULL) and
          * event_base_loopbreak(base) act differently when no event loop is
          * running: loopexit schedules the next instance of the event loop to
@@ -695,7 +694,6 @@ void EVHttpServer::HttpReq::querys(std::list<HttpKeyVal> & ret) const
         evhttp_uri_free(evhttpUri);
         evhttpUri = nullptr;
     }
-
 }
 
 /**
