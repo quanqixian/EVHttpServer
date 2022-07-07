@@ -768,7 +768,7 @@ bool EVHttpServer::HttpRes::setBody(const std::string & body)
  * @retval     true : set success
  * @retval     false : set failed
  */
-bool EVHttpServer::HttpRes::setHeaders(std::list<HttpKeyVal> & list)
+bool EVHttpServer::HttpRes::setHeaders(const std::list<HttpKeyVal> & list)
 {
     evhttp_clear_headers(evhttp_request_get_output_headers(m_request));
     return addHeaders(list);
@@ -780,7 +780,7 @@ bool EVHttpServer::HttpRes::setHeaders(std::list<HttpKeyVal> & list)
  * @retval     true : set success
  * @retval     false : set failed
  */
-bool EVHttpServer::HttpRes::addHeaders(std::list<HttpKeyVal> & list)
+bool EVHttpServer::HttpRes::addHeaders(const std::list<HttpKeyVal> & list)
 {
     bool ret = true;
 

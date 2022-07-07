@@ -112,8 +112,8 @@ public:
     public:
         bool setBody(const std::string & body);
         bool addHeader(const HttpKeyVal & header);
-        bool addHeaders(std::list<HttpKeyVal> & list);
-        bool setHeaders(std::list<HttpKeyVal> & list);
+        bool addHeaders(const std::list<HttpKeyVal> & list);
+        bool setHeaders(const std::list<HttpKeyVal> & list);
 
         void setCode(const int & code);
         void setReason(const std::string & reason);
