@@ -15,13 +15,7 @@
 #include <list>
 #include <regex>
 
-#ifndef HTTP_SERVER_USE_THREADPOOL
-    #define HTTP_SERVER_USE_THREADPOOL (1) /* Whether to use thread pool, configurable */
-#endif
-
-#if HTTP_SERVER_USE_THREADPOOL
-    #include "ThreadPool.h"
-#endif
+#include "ThreadPool.h"
 
 /**
  * @def   USE_LINUX_REGEX_API
@@ -154,7 +148,7 @@ public:
     EVHttpServer();
     virtual ~EVHttpServer();
     bool init(const unsigned int port, const std::string & ip = "0.0.0.0");
-    bool start(unsigned int threadNum = 1);
+    bool start(unsigned int threadNum = 5);
     bool stop();
     bool addHandler(const UrlAndMethod & reqArg, const ReqHandler & handler, void * arg = nullptr);
     bool rmHandler(const UrlAndMethod & reqArg);
@@ -200,10 +194,7 @@ private:
     std::mutex m_mutex;
     std::unordered_map<UrlAndMethod, CallBackBind, UrlAndMethodHash> m_handlerMap;  /* map of request and callback functions */
     std::list<RegNode> m_regList;
-
-#if HTTP_SERVER_USE_THREADPOOL
     ThreadPool * m_threadPool = nullptr;
-#endif
     EVHttpServer(const EVHttpServer &) = delete;
     EVHttpServer & operator = (const EVHttpServer &) = delete;
 };

@@ -280,7 +280,7 @@ TEST(testHttpReq, testHttpReq)
     EXPECT_EQ(server.addHandler({EVHTTP_REQ_PUT, "/api/putHandle"}, Handle::putHandle, (void *)&flag), true);
     EXPECT_EQ(server.addHandler({EVHTTP_REQ_GET, "/api/getHandle"}, Handle::getHandle, (void *)&flag), true);
     EXPECT_EQ(server.addHandler({EVHTTP_REQ_DELETE, "/api/deleteHandle"}, Handle::deleteHandle, (void *)&flag), true);
-    EXPECT_EQ(server.start(5), true);
+    ASSERT_EQ(server.start(5), true);
 
     flag = false;
     std::string cmdPost = R"(curl -i "http://0.0.0.0:9999/api/postHandle?system=ubuntu&test=passed"  \
@@ -346,7 +346,7 @@ TEST(testHttpReq, testBigBody)
     EVHttpServer server;
     EXPECT_EQ(server.init(9999, "0.0.0.0"), true);
     EXPECT_EQ(server.addHandler({EVHTTP_REQ_POST, "/api/fun"}, Handle::handleFunc, (void *)&flag), true);
-    EXPECT_EQ(server.start(5), true);
+    ASSERT_EQ(server.start(5), true);
 
     flag = false;
     std::string cmdPost = R"(curl "http://0.0.0.0:9999/api/fun" -d @./testHttpReq.h  -X POST)";
@@ -443,7 +443,7 @@ TEST(testHttpReq, methodStr)
     EXPECT_EQ(server.addHandler({EVHTTP_REQ_CONNECT, "/api/connectHandle"}, Handle::connectHandle, (void *)&flag), true);
     EXPECT_EQ(server.addHandler({EVHTTP_REQ_HEAD, "/api/headHandle"}, Handle::headHandle, (void *)&flag), true);
     EXPECT_EQ(server.addHandler({EVHTTP_REQ_PATCH, "/api/patchHandle"}, Handle::patchHandle, (void *)&flag), true);
-    EXPECT_EQ(server.start(5), true);
+    ASSERT_EQ(server.start(5), true);
 
     {
         flag = false;

@@ -153,8 +153,8 @@ bool EVHttpServer::deInit()
 }
 
 /**
- * @brief      Start http server，run event dispatch thread, if use ThreadPool,
- * the thread pool will be created and started.
+ * @brief      Start http server，run event dispatch thread. if threadNum > 0,
+ * the thread pool will be created and start threadNum threads.
  * @param[in]  threadNum : When using ThreadPool, specify thenumber of threads in the thread pool
  * @retval     true : success 
  * @retval     false : failed
@@ -170,23 +170,21 @@ bool EVHttpServer::start(unsigned int threadNum)
     }
 
     /* Create thread pool */
-#if HTTP_SERVER_USE_THREADPOOL
-    if(threadNum < 1)
+    if(threadNum > 0)
     {
-        EVLOG_ERROR(-1, "Create thread pool failed, thread num should >= 1");
-        return false;
-    }
 
-    m_threadPool = new ThreadPool(threadNum);
-    if(nullptr == m_threadPool)
-    {
-        EVLOG_ERROR(-1, "Create thread pool failed!");
-        return false;
+        m_threadPool = new ThreadPool(threadNum);
+        if(nullptr == m_threadPool)
+        {
+            EVLOG_ERROR(-1, "Create thread pool failed!");
+            return false;
+        }
+        EVLOG_INFO("ThreadPool create thread num:%u", threadNum);
     }
-    EVLOG_INFO("ThreadPool create thread num:%u", threadNum);
-#else
-    EVLOG_WARN(0, "Parameter threadNum:%d is useless when the thread pool is not used", threadNum);
-#endif
+    else
+    {
+        EVLOG_WARN(0, "Parameter threadNum:%d, not use thread pool.", threadNum);
+    }
 
     /* Create dispatch thread */
     m_isRunning = true;
@@ -278,7 +276,7 @@ void EVHttpServer::dealTask(struct evhttp_request * request, const UrlAndMethod 
  *   Find the processing function according to the request parameters.
  * The request parameters will first match the parameters in the map, and then
  * match the items in the regex list if the matching fails.
- *   If HTTP_SERVER_USE_THREADPOOL is set,the task will be push in thread pool,
+ *   If thread pool in used, the task will be push in thread pool,
  * otherwise task will be handle immediately.
  * @param[in]  request : a request object of livevent
  * @param[in]  arg : User defined parameter. use "this" pointer here.
@@ -305,11 +303,15 @@ void EVHttpServer::handleHttpEvent(struct evhttp_request * request, void * arg)
          * the public function that locks m_mutex in the callback function
          */
         pThis->m_mutex.unlock();
-#if HTTP_SERVER_USE_THREADPOOL
-        pThis->m_threadPool->enqueue(dealTask, request, reqArg, handleBind);
-#else
-        dealTask(request, reqArg, handleBind);
-#endif
+
+        if(pThis->m_threadPool)
+        {
+            pThis->m_threadPool->enqueue(dealTask, request, reqArg, handleBind);
+        }
+        else
+        {
+            dealTask(request, reqArg, handleBind);
+        }
     }
     else
     {
@@ -334,11 +336,15 @@ void EVHttpServer::handleHttpEvent(struct evhttp_request * request, void * arg)
              * the public function that locks m_mutex in the callback function
              */
             pThis->m_mutex.unlock();
-    #if HTTP_SERVER_USE_THREADPOOL
-            pThis->m_threadPool->enqueue(dealTask, request, reqArg, handleBind);
-    #else
-            dealTask(request, reqArg, handleBind);
-    #endif
+
+            if(pThis->m_threadPool)
+            {
+                pThis->m_threadPool->enqueue(dealTask, request, reqArg, handleBind);
+            }
+            else
+            {
+                dealTask(request, reqArg, handleBind);
+            }
             return;
         }
         pThis->m_mutex.unlock();
@@ -378,13 +384,11 @@ bool EVHttpServer::stop()
             m_thread = nullptr;
         }
 
-#if HTTP_SERVER_USE_THREADPOOL
         if(m_threadPool)
         {
             delete m_threadPool;
             m_threadPool = nullptr;
         }
-#endif
     }
 
     return (false == m_isRunning);
