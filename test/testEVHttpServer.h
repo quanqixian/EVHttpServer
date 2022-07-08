@@ -17,6 +17,15 @@ TEST(testEVHttpServer, testInit)
 }
 
 /**
+ * @brief test init multiple ports
+ */
+TEST(testEVHttpServer, testInitMultiplePorts)
+{
+    EVHttpServer server;
+    EXPECT_EQ(server.init({7777, 8888, 9999}, "0.0.0.0"), true);
+}
+
+/**
  * @brief test start
  */
 TEST(testEVHttpServer, testStart)

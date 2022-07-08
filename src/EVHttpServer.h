@@ -148,6 +148,7 @@ public:
     EVHttpServer();
     virtual ~EVHttpServer();
     bool init(const unsigned int port, const std::string & ip = "0.0.0.0");
+    bool init(const std::list<unsigned int> & portList, const std::string & ip = "0.0.0.0");
     bool start(unsigned int threadNum = 5);
     bool stop();
     bool addHandler(const UrlAndMethod & reqArg, const ReqHandler & handler, void * arg = nullptr);
@@ -190,7 +191,7 @@ private:
     volatile bool m_isInited = false;       /* initialized flag */
     volatile bool m_isRunning = false;      /* dispatch thread run flag */
     event_base * m_base = nullptr;
-    evhttp * m_eventHttp = nullptr;
+    std::list<void *> m_evhttpList;
     std::mutex m_mutex;
     std::unordered_map<UrlAndMethod, CallBackBind, UrlAndMethodHash> m_handlerMap;  /* map of request and callback functions */
     std::list<RegNode> m_regList;

@@ -27,6 +27,21 @@ EVHttpServer::EVHttpServer()
  */
 bool EVHttpServer::init(const unsigned int port, const std::string & ip)
 {
+    std::list<unsigned int> list;
+    list.push_back(port);
+
+    return init(list, ip);
+}
+
+/**
+ * @brief      Initialize the http server with multiple ports.
+ * @param[in]  portList : http port list
+ * @param[in]  ip IP address, default parameter "0.0.0.0"
+ * @retval     true : success
+ * @retval     false : failed
+ */
+bool EVHttpServer::init(const std::list<unsigned int> & portList, const std::string & ip)
+{
     bool ret = true;
     std::lock_guard<std::mutex> locker(m_mutex);
 
@@ -76,23 +91,27 @@ bool EVHttpServer::init(const unsigned int port, const std::string & ip)
             break;
         }
 
-        m_eventHttp = evhttp_new(m_base);
-        if(nullptr == m_eventHttp)
+        for(const auto & port : portList)
         {
-            ret = false;
-            break;
-        }
+            evhttp * pEvhttp = evhttp_new(m_base);
+            if(nullptr == pEvhttp)
+            {
+                ret = false;
+                break;
+            }
 
-        if(0 != evhttp_bind_socket(m_eventHttp, ip.c_str(), port))
-        {
-            EVLOG_ERROR(-1, "evhttp_bind_socket failed!");
-            ret = false;
-            break;
-        }
-        evhttp_set_allowed_methods(m_eventHttp, EVHTTP_REQ_GET | EVHTTP_REQ_POST | EVHTTP_REQ_HEAD | EVHTTP_REQ_PUT |
-                EVHTTP_REQ_DELETE | EVHTTP_REQ_OPTIONS | EVHTTP_REQ_TRACE | EVHTTP_REQ_CONNECT | EVHTTP_REQ_PATCH);
+            if(0 != evhttp_bind_socket(pEvhttp, ip.c_str(), port))
+            {
+                EVLOG_ERROR(-1, "evhttp_bind_socket failed, %s:%d", ip.c_str(), port);
+                ret = false;
+                break;
+            }
+            evhttp_set_allowed_methods(pEvhttp, EVHTTP_REQ_GET | EVHTTP_REQ_POST | EVHTTP_REQ_HEAD | EVHTTP_REQ_PUT |
+                    EVHTTP_REQ_DELETE | EVHTTP_REQ_OPTIONS | EVHTTP_REQ_TRACE | EVHTTP_REQ_CONNECT | EVHTTP_REQ_PATCH);
 
-        evhttp_set_gencb(m_eventHttp, handleHttpEvent, this);
+            evhttp_set_gencb(pEvhttp, handleHttpEvent, this);
+            m_evhttpList.push_back(static_cast<void *>(pEvhttp));
+        }
 
         /* set initialized flag */
         m_isInited = true;
@@ -101,11 +120,13 @@ bool EVHttpServer::init(const unsigned int port, const std::string & ip)
 
     if(!ret)
     {
-        if(m_eventHttp)
+        for(auto & pEvhttp : m_evhttpList)
         {
-            evhttp_free(m_eventHttp);
-            m_eventHttp = nullptr;
+            evhttp_free(static_cast<evhttp *>(pEvhttp));
+            pEvhttp = nullptr;
         }
+        m_evhttpList.clear();
+
         if(m_base)
         {
             event_base_free(m_base);
@@ -136,11 +157,12 @@ bool EVHttpServer::deInit()
         return true;
     }
 
-    if(m_eventHttp)
+    for(auto & pEvhttp : m_evhttpList)
     {
-        evhttp_free(m_eventHttp);
-        m_eventHttp = nullptr;
+        evhttp_free(static_cast<evhttp *>(pEvhttp));
+        pEvhttp = nullptr;
     }
+    m_evhttpList.clear();
 
     if(m_base)
     {
