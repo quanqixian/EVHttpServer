@@ -502,4 +502,89 @@ TEST(testHttpReq, methodStr)
         EXPECT_EQ(flag, true);
     }
 }
+
+/**
+ * @brief Test without thread pool
+ */
+TEST(testHttpReq, testNoThreadPool)
+{
+    volatile bool flag = false;
+
+    class Handle
+    {
+    public:
+        static void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        {
+            bool * pFlag = static_cast<bool *>(arg);
+            *pFlag = true;
+        }
+    };
+
+    EVHttpServer server;
+    EXPECT_EQ(server.init(9999, "0.0.0.0"), true);
+    EXPECT_EQ(server.addHandler({EVHTTP_REQ_POST, "/api/fun"}, Handle::handleFunc, (void *)&flag), true);
+    EXPECT_EQ(server.addRegHandler({EVHTTP_REQ_POST, "/api/fun[1-9]+"}, Handle::handleFunc, (void *)&flag), true);
+    ASSERT_EQ(server.start(0), true);
+
+    {
+        flag = false;
+        std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/fun" -X POST )";
+        system(cmd.c_str());
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        EXPECT_EQ(flag, true);
+    }
+    {
+        flag = false;
+        std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/fun100" -X POST )";
+        system(cmd.c_str());
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        EXPECT_EQ(flag, true);
+    }
+}
+
+/**
+ * @brief Test multiple ports
+ */
+TEST(testHttpReq, testMultilePorts)
+{
+    volatile bool flag = false;
+
+    class Handle
+    {
+    public:
+        static void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        {
+            bool * pFlag = static_cast<bool *>(arg);
+            *pFlag = true;
+        }
+    };
+
+    EVHttpServer server;
+    EXPECT_EQ(server.init({7777, 8888, 9999}, "0.0.0.0"), true);
+    EXPECT_EQ(server.addHandler({EVHTTP_REQ_POST, "/api/fun"}, Handle::handleFunc, (void *)&flag), true);
+    ASSERT_EQ(server.start(0), true);
+
+    {
+        flag = false;
+        std::string cmd = R"(curl -i "http://0.0.0.0:7777/api/fun" -X POST )";
+        system(cmd.c_str());
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        EXPECT_EQ(flag, true);
+    }
+    {
+        flag = false;
+        std::string cmd = R"(curl -i "http://0.0.0.0:8888/api/fun" -X POST )";
+        system(cmd.c_str());
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        EXPECT_EQ(flag, true);
+    }
+    {
+        flag = false;
+        std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/fun" -X POST )";
+        system(cmd.c_str());
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        EXPECT_EQ(flag, true);
+    }
+}
+
 #endif
