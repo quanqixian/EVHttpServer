@@ -620,10 +620,10 @@ std::string EVHttpServer::HttpReq::methodStr() const
 }
 
 /**
- * @brief      Get http request url
+ * @brief      Get http request path
  * @return     url string
  */
-std::string EVHttpServer::HttpReq::url() const
+std::string EVHttpServer::HttpReq::path() const
 {
     const struct evhttp_uri * pUri = evhttp_request_get_evhttp_uri(m_request);
     const char * path = evhttp_uri_get_path(pUri);

@@ -21,7 +21,7 @@ TEST(testHttpReq, testHttpReq)
             EXPECT_EQ(req.method(), EVHTTP_REQ_POST);
             EXPECT_EQ(req.methodStr(), "POST");
 
-            EXPECT_EQ(req.url(), "/api/postHandle");
+            EXPECT_EQ(req.path(), "/api/postHandle");
 
             std::string body = R"({"name":"tom"})";
             EXPECT_EQ(req.body(), body);
@@ -86,7 +86,7 @@ TEST(testHttpReq, testHttpReq)
             EXPECT_EQ(req.method(), EVHTTP_REQ_PUT);
             EXPECT_EQ(req.methodStr(), "PUT");
 
-            EXPECT_EQ(req.url(), "/api/putHandle");
+            EXPECT_EQ(req.path(), "/api/putHandle");
 
             std::string body = R"({"name":"tom"})";
             EXPECT_EQ(req.body(), body);
@@ -151,7 +151,7 @@ TEST(testHttpReq, testHttpReq)
             EXPECT_EQ(req.method(), EVHTTP_REQ_GET);
             EXPECT_EQ(req.methodStr(), "GET");
 
-            EXPECT_EQ(req.url(), "/api/getHandle");
+            EXPECT_EQ(req.path(), "/api/getHandle");
 
             std::string value;
             EXPECT_EQ(req.findHeader("Content-Type", value), true);
@@ -212,7 +212,7 @@ TEST(testHttpReq, testHttpReq)
             EXPECT_EQ(req.method(), EVHTTP_REQ_DELETE);
             EXPECT_EQ(req.methodStr(), "DELETE");
 
-            EXPECT_EQ(req.url(), "/api/deleteHandle");
+            EXPECT_EQ(req.path(), "/api/deleteHandle");
 
             std::string body = R"({"name":"tom"})";
             EXPECT_EQ(req.body(), body);

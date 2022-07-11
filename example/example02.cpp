@@ -38,7 +38,7 @@ void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, 
     std::cout << "Thread id:" << std::this_thread::get_id() << std::endl;
 
     /* 请求行内容 */
-    std::cout << req.methodStr() << " " << req.url() << std::endl;
+    std::cout << req.methodStr() << " " << req.path() << std::endl;
 
     /* 请求头 */
     req.headers(inList);

@@ -21,7 +21,7 @@ TEST(testRegexMatch, testRegexMatch)
             EXPECT_EQ(req.method(), EVHTTP_REQ_POST);
             EXPECT_EQ(req.methodStr(), "POST");
 
-            EXPECT_EQ(req.url(), "/api/postHandle777");
+            EXPECT_EQ(req.path(), "/api/postHandle777");
 
             std::string body = R"({"name":"tom"})";
             EXPECT_EQ(req.body(), body);
@@ -86,7 +86,7 @@ TEST(testRegexMatch, testRegexMatch)
             EXPECT_EQ(req.method(), EVHTTP_REQ_PUT);
             EXPECT_EQ(req.methodStr(), "PUT");
 
-            EXPECT_EQ(req.url(), "/api/putHandle88_66");
+            EXPECT_EQ(req.path(), "/api/putHandle88_66");
 
             std::string body = R"({"name":"tom"})";
             EXPECT_EQ(req.body(), body);
@@ -151,7 +151,7 @@ TEST(testRegexMatch, testRegexMatch)
             EXPECT_EQ(req.method(), EVHTTP_REQ_GET);
             EXPECT_EQ(req.methodStr(), "GET");
 
-            EXPECT_EQ(req.url(), "/api/getHandle7x");
+            EXPECT_EQ(req.path(), "/api/getHandle7x");
 
             std::string value;
             EXPECT_EQ(req.findHeader("Content-Type", value), true);
@@ -212,7 +212,7 @@ TEST(testRegexMatch, testRegexMatch)
             EXPECT_EQ(req.method(), EVHTTP_REQ_DELETE);
             EXPECT_EQ(req.methodStr(), "DELETE");
 
-            EXPECT_EQ(req.url(), "/api/deleteHandleFunction");
+            EXPECT_EQ(req.path(), "/api/deleteHandleFunction");
 
             std::string body = R"({"name":"tom"})";
             EXPECT_EQ(req.body(), body);
