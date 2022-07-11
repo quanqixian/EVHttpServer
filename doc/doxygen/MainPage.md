@@ -29,7 +29,7 @@ void sighandler(int signum)
 
 void func(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
 {
-    std::cout << req.methodStr() << " " << req.url() << std::endl;
+    std::cout << req.methodStr() << " " << req.path() << std::endl;
     std::cout << req.body() << std::endl;
 
     res.setBody(R"({"status":"OK"})");
