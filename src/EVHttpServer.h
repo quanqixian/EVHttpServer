@@ -20,7 +20,7 @@
 /**
  * @def   USE_LINUX_REGEX_API
  * @brief Since some compilers are not good at implementing regular expressions in C++11,
- * Under linux, choose to use the system api to support url regular matching,
+ * Under linux, choose to use the system api to support path regular matching,
  * There is also an option to use the regex support in C++11.
  */
 #define USE_LINUX_REGEX_API (1)
@@ -52,7 +52,7 @@
  * using c++11, It provides:
  * - Simpler api
  * - Use thread pool to handle http requests
- * - Support regular matching url
+ * - Support regular matching path
  */
 class EVHttpServer
 {
@@ -69,7 +69,7 @@ public:
 
     /**
      * @brief HttpReq is an encapsulation class for http requests, which
-     * provides access to methods and urls
+     * provides access to method and path
      * body and other methods. It is not allowed to be created externally.
      */
     class HttpReq
@@ -128,22 +128,22 @@ public:
     using ReqHandler = void (*)(const HttpReq & req, HttpRes & res, void * arg);/* Define http request callback function type */
 public:
     /**
-     * @brief Url and method are used to represent an HTTP request 
+     * @brief Path and method are used to represent an HTTP request 
      */
-    struct UrlAndMethod
+    struct PathAndMethod
     {
         evhttp_cmd_type method;
-        std::string url;
+        std::string path;
     public:
-        UrlAndMethod() : method(EVHTTP_REQ_GET)
+        PathAndMethod() : method(EVHTTP_REQ_GET)
         {
         }
-        UrlAndMethod(evhttp_cmd_type m, const std::string & u) : method(m), url(u)
+        PathAndMethod(evhttp_cmd_type m, const std::string & u) : method(m), path(u)
         {
         }
-        bool operator == (const UrlAndMethod & info) const
+        bool operator == (const PathAndMethod & info) const
         {
-            return ((this->method == info.method) && (this->url == info.url));
+            return ((this->method == info.method) && (this->path == info.path));
         }
     };
 public:
@@ -153,20 +153,20 @@ public:
     bool init(const std::list<unsigned int> & portList, const std::string & ip = "0.0.0.0");
     bool start(unsigned int threadNum = 5);
     bool stop();
-    bool addHandler(const UrlAndMethod & reqArg, const ReqHandler & handler, void * arg = nullptr);
-    bool rmHandler(const UrlAndMethod & reqArg);
-    bool addRegHandler(const UrlAndMethod & reqArg, const ReqHandler & handler, void * arg = nullptr);
-    bool rmRegHandler(const UrlAndMethod & reqArg);
+    bool addHandler(const PathAndMethod & reqArg, const ReqHandler & handler, void * arg = nullptr);
+    bool rmHandler(const PathAndMethod & reqArg);
+    bool addRegHandler(const PathAndMethod & reqArg, const ReqHandler & handler, void * arg = nullptr);
+    bool rmRegHandler(const PathAndMethod & reqArg);
 private:
     bool deInit();
     static void handleHttpEvent(struct evhttp_request * request, void * arg);
     static void * dispatchThread(void * arg);
 private:
-    struct UrlAndMethodHash
+    struct PathAndMethodHash
     {
-        std::size_t operator () (const UrlAndMethod & t) const
+        std::size_t operator () (const PathAndMethod & t) const
         {
-            std::string key = std::to_string(t.method) + t.url;
+            std::string key = std::to_string(t.method) + t.path;
             std::hash<std::string> strHash;
             return strHash(key);
         }
@@ -178,7 +178,7 @@ private:
     };
     struct RegNode
     {
-        UrlAndMethod reqArg;
+        PathAndMethod reqArg;
 #if USE_LINUX_REGEX_API
         regex_t reg;
 #else
@@ -187,7 +187,7 @@ private:
         CallBackBind callbackBind;
     };
 private:
-    static void dealTask(struct evhttp_request * request, const UrlAndMethod & reqArg, const CallBackBind & handleBind);
+    static void dealTask(struct evhttp_request * request, const PathAndMethod & reqArg, const CallBackBind & handleBind);
 private:
     std::thread * m_thread = nullptr;       /* dispatch thread */
     volatile bool m_isInited = false;       /* initialized flag */
@@ -195,7 +195,7 @@ private:
     event_base * m_base = nullptr;
     std::list<void *> m_evhttpList;
     std::mutex m_mutex;
-    std::unordered_map<UrlAndMethod, CallBackBind, UrlAndMethodHash> m_handlerMap;  /* map of request and callback functions */
+    std::unordered_map<PathAndMethod, CallBackBind, PathAndMethodHash> m_handlerMap;  /* map of request and callback functions */
     std::list<RegNode> m_regList;
     ThreadPool * m_threadPool = nullptr;
     EVHttpServer(const EVHttpServer &) = delete;

@@ -223,13 +223,13 @@ bool EVHttpServer::start(unsigned int threadNum)
 
 /**
  * @brief      Register the callback handler function corresponding to the http request
- * @param[in]  reqArg : http request parameters, including request method and url, see @ref UrlAndMethod for details 
+ * @param[in]  reqArg : http request parameters, including request method and path, see @ref PathAndMethod for details 
  * @param[in]  handler : callback handler function
  * @param[in]  arg : User-defined parameters
  * @retval     true : Add success
  * @retval     false : Add failed
  */
-bool EVHttpServer::addHandler(const UrlAndMethod & reqArg, const ReqHandler & handler, void * arg)
+bool EVHttpServer::addHandler(const PathAndMethod & reqArg, const ReqHandler & handler, void * arg)
 {
     bool ret = true;
 
@@ -256,11 +256,11 @@ bool EVHttpServer::addHandler(const UrlAndMethod & reqArg, const ReqHandler & ha
 
 /**
  * @brief      Remove the callback handler corresponding to the http request
- * @param[in]  reqArg : http request parameters, including request method and url, see @ref UrlAndMethod for details 
+ * @param[in]  reqArg : http request parameters, including request method and path, see @ref PathAndMethod for details 
  * @retval     true : success
  * @retval     false : failed
  */
-bool EVHttpServer::rmHandler(const UrlAndMethod & reqArg)
+bool EVHttpServer::rmHandler(const PathAndMethod & reqArg)
 {
     std::lock_guard<std::mutex> locker(m_mutex);
 
@@ -277,11 +277,11 @@ bool EVHttpServer::rmHandler(const UrlAndMethod & reqArg)
 /**
  * @brief      task handler function
  * @param[in]  request : A pointer representing the type of http request in libevent
- * @param[in]  reqArg : http request parameters, including request method and url, see @ref UrlAndMethod for details 
+ * @param[in]  reqArg : http request parameters, including request method and path, see @ref PathAndMethod for details 
  * @param[in]  handleBind : Callback parameters, including callback function and user parameters
  * @return     void
  */
-void EVHttpServer::dealTask(struct evhttp_request * request, const UrlAndMethod & reqArg, const CallBackBind & handleBind)
+void EVHttpServer::dealTask(struct evhttp_request * request, const PathAndMethod & reqArg, const CallBackBind & handleBind)
 {
     HttpReq req(request);
     HttpRes res(request);
@@ -306,12 +306,12 @@ void EVHttpServer::dealTask(struct evhttp_request * request, const UrlAndMethod 
  */
 void EVHttpServer::handleHttpEvent(struct evhttp_request * request, void * arg)
 {
-    UrlAndMethod reqArg;
+    PathAndMethod reqArg;
     EVHttpServer * pThis = static_cast<EVHttpServer *>(arg);
 
     const struct evhttp_uri * pUri = evhttp_request_get_evhttp_uri(request);
     const char * path = evhttp_uri_get_path(pUri);
-    reqArg.url = (path != nullptr) ? path : "";
+    reqArg.path = (path != nullptr) ? path : "";
     reqArg.method = evhttp_request_get_command(request);
 
     pThis->m_mutex.lock();
@@ -340,13 +340,13 @@ void EVHttpServer::handleHttpEvent(struct evhttp_request * request, void * arg)
         for(auto iter = pThis->m_regList.begin(); iter != pThis->m_regList.end(); ++iter)
         {
     #if (!USE_LINUX_REGEX_API)
-            if (false == std::regex_search(reqArg.url.c_str(), iter->reg))
+            if (false == std::regex_search(reqArg.path.c_str(), iter->reg))
             {
                 continue;
             }
     #else
             /* The effect of regexec is similar to regex_search, not regex_match */
-            int regRet = regexec(&iter->reg, reqArg.url.c_str(), 0, nullptr, 0);
+            int regRet = regexec(&iter->reg, reqArg.path.c_str(), 0, nullptr, 0);
             if((0 != regRet) || ( iter->reqArg.method != reqArg.method)) 
             {
                 continue;
@@ -452,14 +452,14 @@ EVHttpServer::~EVHttpServer()
 }
 
 /**
- * @brief      Register url to support regular matching callback function.
- * @param[in]  reqArg : http request parameters, including request method and url, see @ref UrlAndMethod for details 
+ * @brief      Add a handler for regular resources.
+ * @param[in]  reqArg : http request parameters, including request method and path, see @ref PathAndMethod for details 
  * @param[in]  handler : callback function
  * @param[in]  arg : User-defined parameters
  * @retval     true : Add success
  * @retval     false : Add failed
  */
-bool EVHttpServer::addRegHandler(const UrlAndMethod & reqArg, const ReqHandler & handler, void * arg)
+bool EVHttpServer::addRegHandler(const PathAndMethod & reqArg, const ReqHandler & handler, void * arg)
 {
     std::lock_guard<std::mutex> locker(m_mutex);
 
@@ -470,7 +470,7 @@ bool EVHttpServer::addRegHandler(const UrlAndMethod & reqArg, const ReqHandler &
     }
 
     /*
-     * Traverse the linked list, if found to the same method and url description
+     * Traverse the linked list, if found to the same method and path description
      * has been inserted before, then failed to insert.
      */
     for(auto iter = m_regList.begin(); iter != m_regList.end(); ++iter)
@@ -485,7 +485,7 @@ bool EVHttpServer::addRegHandler(const UrlAndMethod & reqArg, const ReqHandler &
      * Insert new node into linked list
      */
 #if (!USE_LINUX_REGEX_API)
-    std::regex reg(reqArg.url);
+    std::regex reg(reqArg.path);
 #else
     int ret = 0;
     regex_t reg = {0};
@@ -498,7 +498,7 @@ bool EVHttpServer::addRegHandler(const UrlAndMethod & reqArg, const ReqHandler &
      *   regexec() are ignored if the pattern buffer supplied was compiled with
      *   this flag set.
      */
-    ret = regcomp(&reg, reqArg.url.c_str(), REG_EXTENDED | REG_NOSUB);
+    ret = regcomp(&reg, reqArg.path.c_str(), REG_EXTENDED | REG_NOSUB);
     if(0 != ret)
     {
         char errBuf[256] = {0};
@@ -515,12 +515,12 @@ bool EVHttpServer::addRegHandler(const UrlAndMethod & reqArg, const ReqHandler &
 }
 
 /**
- * @brief      Remove the callback function that url supports regular matching
- * @param[in]  reqArg : http request parameters, including request method and url, see @ref UrlAndMethod for details 
+ * @brief      Remove handlers for regular resources
+ * @param[in]  reqArg : http request parameters, including request method and path, see @ref PathAndMethod for details 
  * @retval     true : success
  * @retval     false : failed
  */
-bool EVHttpServer::rmRegHandler(const UrlAndMethod & reqArg)
+bool EVHttpServer::rmRegHandler(const PathAndMethod & reqArg)
 {
     std::lock_guard<std::mutex> locker(m_mutex);
 
@@ -621,7 +621,7 @@ std::string EVHttpServer::HttpReq::methodStr() const
 
 /**
  * @brief      Get http request path
- * @return     url string
+ * @return     path string
  */
 std::string EVHttpServer::HttpReq::path() const
 {

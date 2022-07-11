@@ -89,7 +89,7 @@ void handleFunRemoveTest(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRe
 {
     std::cout << "handleFunRemoveTest" << std::endl;
 
-    EVHttpServer::UrlAndMethod reqArg;
+    EVHttpServer::PathAndMethod reqArg;
     reqArg.method = EVHTTP_REQ_POST;
     reqArg.url = "/api/removeAfterhandle";
     g_server.rmHandler(reqArg);
