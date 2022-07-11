@@ -563,7 +563,7 @@ evhttp_cmd_type EVHttpServer::HttpReq::method() const
 }
 
 /**
- * @brief      Get http request host in uri
+ * @brief      Get http request host 
  * @return     Returns the host associated with the request. If a client sends
  * an absolute URI, the host part of that is preferred. Otherwise, the input headers are
  * searched for a Host: header. NULL is returned if no absolute URI or Host:header is provided.
@@ -571,6 +571,40 @@ evhttp_cmd_type EVHttpServer::HttpReq::method() const
 std::string EVHttpServer::HttpReq::host() const
 {
     return evhttp_request_get_host(m_request);
+}
+
+/**
+ * @brief      Get http request port in uri
+ * @return     Return the port part of an uri, or -1 if there is no port set.
+ */
+int EVHttpServer::HttpReq::port() const
+{
+    const struct evhttp_uri * pUri = evhttp_request_get_evhttp_uri(m_request);
+    return evhttp_uri_get_port(pUri);
+}
+
+/**
+ * @brief      Get http request scheme in uri
+ * @return     Return the scheme of an uri, or "" if there is no scheme
+ * has been set.
+ */
+std::string EVHttpServer::HttpReq::scheme() const
+{
+    const struct evhttp_uri * pUri = evhttp_request_get_evhttp_uri(m_request);
+    const char * scheme = evhttp_uri_get_scheme(pUri);
+    return (scheme != nullptr) ? scheme : "";
+}
+
+/**
+ * @brief      Get http request scheme in uri
+ * @return     return the userinfo part of an uri, or "" if it has no
+ * userinfo set.
+ */
+std::string EVHttpServer::HttpReq::userinfo() const
+{
+    const struct evhttp_uri * pUri = evhttp_request_get_evhttp_uri(m_request);
+    const char * userinfo = evhttp_uri_get_userinfo(pUri);
+    return (userinfo != nullptr) ? userinfo : "";
 }
 
 /**

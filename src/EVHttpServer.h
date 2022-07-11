@@ -84,6 +84,9 @@ public:
         std::string uri() const;
         std::string path() const;
         std::string host() const;
+        int port() const;
+        std::string scheme() const;
+        std::string userinfo() const;
         std::string body() const;
 
         void headers(std::list<HttpKeyVal> & ret) const;
