@@ -69,8 +69,12 @@ public:
 
     /**
      * @brief HttpReq is an encapsulation class for http requests, which
-     * provides access to method and path
-     * body and other methods. It is not allowed to be created externally.
+     * provides access to method and path body and other functions. 
+     *   It is not allowed to be created externally.
+     *   Here is an example illustrating the parts of the url:
+     *         ┌──useriunfo─┐ ┌────host─────┐ ┌port┐ 
+     *   https:admin:password@www.example.com:123456/forum/questions/?tag=networking&order=newest#top
+     *└scheme┘ └────────────authority──────────────┘└────path───────┘ └────────query────────────┘ └fragment┘
      */
     class HttpReq
     {
