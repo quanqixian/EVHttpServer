@@ -563,7 +563,7 @@ evhttp_cmd_type EVHttpServer::HttpReq::method() const
 }
 
 /**
- * @brief      Get http request host
+ * @brief      Get http request host in uri
  * @return     Returns the host associated with the request. If a client sends
  * an absolute URI, the host part of that is preferred. Otherwise, the input headers are
  * searched for a Host: header. NULL is returned if no absolute URI or Host:header is provided.
@@ -628,6 +628,16 @@ std::string EVHttpServer::HttpReq::url() const
     const struct evhttp_uri * pUri = evhttp_request_get_evhttp_uri(m_request);
     const char * path = evhttp_uri_get_path(pUri);
     return (path != nullptr) ? path : "";
+}
+
+/**
+ * @brief      Get http request uri
+ * @return     uri string
+ */
+std::string EVHttpServer::HttpReq::uri() const
+{
+    const char * uri = evhttp_request_get_uri(m_request);
+    return (uri != nullptr) ? uri : "";
 }
 
 /**

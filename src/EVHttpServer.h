@@ -77,6 +77,7 @@ public:
     public:
         evhttp_cmd_type method() const;
         std::string methodStr() const;
+        std::string uri() const;
         std::string url() const;
         std::string host() const;
         std::string body() const;
