@@ -587,4 +587,36 @@ TEST(testHttpReq, testMultilePorts)
     }
 }
 
+/**
+ * @brief Test get request host
+ */
+TEST(testHttpReq, testGetRequestHost)
+{
+    volatile bool flag = false;
+
+    class Handle
+    {
+    public:
+        static void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        {
+            bool * pFlag = static_cast<bool *>(arg);
+            EXPECT_EQ(req.host(), "0.0.0.0");
+            *pFlag = true;
+        }
+    };
+
+    EVHttpServer server;
+    EXPECT_EQ(server.init(7777), true);
+    EXPECT_EQ(server.addHandler({EVHTTP_REQ_POST, "/api/fun"}, Handle::handleFunc, (void *)&flag), true);
+    ASSERT_EQ(server.start(5), true);
+
+    {
+        flag = false;
+        std::string cmd = R"(curl -i "http://0.0.0.0:7777/api/fun" -X POST )";
+        system(cmd.c_str());
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        EXPECT_EQ(flag, true);
+    }
+}
+
 #endif

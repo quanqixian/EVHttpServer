@@ -78,6 +78,7 @@ public:
         evhttp_cmd_type method() const;
         std::string methodStr() const;
         std::string url() const;
+        std::string host() const;
         std::string body() const;
 
         void headers(std::list<HttpKeyVal> & ret) const;
