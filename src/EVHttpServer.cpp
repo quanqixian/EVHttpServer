@@ -608,6 +608,17 @@ std::string EVHttpServer::HttpReq::userinfo() const
 }
 
 /**
+ * @brief      Get http request fragment in uri
+ * @return     Return the fragment part of an uri (excluding the leading "#"), or NULL if it has no fragment set .
+ */
+std::string EVHttpServer::HttpReq::fragment() const
+{
+    const struct evhttp_uri * pUri = evhttp_request_get_evhttp_uri(m_request);
+    const char * fragment = evhttp_uri_get_fragment(pUri);
+    return (fragment != nullptr) ? fragment : "";
+}
+
+/**
  * @brief      Get http request method string
  * @return     The return value is after converting the evhttp_cmd_type enumeration 
  * type to a string, as listed below:
