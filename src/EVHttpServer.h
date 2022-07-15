@@ -75,20 +75,17 @@ public:
      *         ┌──useriunfo─┐ ┌────host─────┐ ┌port┐ 
      *   https:admin:password@www.example.com:123456/forum/questions/?tag=networking&order=newest#top
      *└scheme┘ └────────────authority──────────────┘└────path───────┘ └────────query────────────┘ └fragment┘
+     *   Some components of the uri do not provide access functions.
      */
     class HttpReq
     {
     public:
         evhttp_cmd_type method() const;
         std::string methodStr() const;
-        std::string uri() const;
         std::string path() const;
-        std::string host() const;
-        int port() const;
-        std::string scheme() const;
-        std::string userinfo() const;
-        std::string fragment() const;
         std::string body() const;
+        std::string uri() const;
+        std::string host() const;
 
         void headers(std::list<HttpKeyVal> & ret) const;
         bool findHeader(const std::string & key, std::string & value) const;

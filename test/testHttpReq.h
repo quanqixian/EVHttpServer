@@ -632,7 +632,7 @@ TEST(testHttpReq, testGetRequestUri)
         static void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
-            EXPECT_EQ(req.uri(), "/api/fun");
+            EXPECT_EQ(req.uri(), "/api/fun?name=Tom");
             *pFlag = true;
         }
     };
@@ -644,7 +644,7 @@ TEST(testHttpReq, testGetRequestUri)
 
     {
         flag = false;
-        std::string cmd = R"(curl -i "http://0.0.0.0:7777/api/fun" -X POST )";
+        std::string cmd = R"(curl -i "http://0.0.0.0:7777/api/fun?name=Tom" -X POST )";
         system(cmd.c_str());
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
         EXPECT_EQ(flag, true);

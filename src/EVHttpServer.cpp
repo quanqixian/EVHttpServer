@@ -2,6 +2,7 @@
 #include <memory>
 #include <cstring>
 #include "event2/thread.h"
+#include "event2/http_struct.h"
 #include <signal.h>
 
 #define EVLOG_FATAL(errnum, fmt, ...) printf("[F] %s:%d [%s] errnum=%d " fmt "\n", __FILE__, __LINE__, __FUNCTION__, errnum, ##__VA_ARGS__)
@@ -571,51 +572,6 @@ evhttp_cmd_type EVHttpServer::HttpReq::method() const
 std::string EVHttpServer::HttpReq::host() const
 {
     return evhttp_request_get_host(m_request);
-}
-
-/**
- * @brief      Get http request port in uri
- * @return     Return the port part of an uri, or -1 if there is no port set.
- */
-int EVHttpServer::HttpReq::port() const
-{
-    const struct evhttp_uri * pUri = evhttp_request_get_evhttp_uri(m_request);
-    return evhttp_uri_get_port(pUri);
-}
-
-/**
- * @brief      Get http request scheme in uri
- * @return     Return the scheme of an uri, or "" if there is no scheme
- * has been set.
- */
-std::string EVHttpServer::HttpReq::scheme() const
-{
-    const struct evhttp_uri * pUri = evhttp_request_get_evhttp_uri(m_request);
-    const char * scheme = evhttp_uri_get_scheme(pUri);
-    return (scheme != nullptr) ? scheme : "";
-}
-
-/**
- * @brief      Get http request scheme in uri
- * @return     return the userinfo part of an uri, or "" if it has no
- * userinfo set.
- */
-std::string EVHttpServer::HttpReq::userinfo() const
-{
-    const struct evhttp_uri * pUri = evhttp_request_get_evhttp_uri(m_request);
-    const char * userinfo = evhttp_uri_get_userinfo(pUri);
-    return (userinfo != nullptr) ? userinfo : "";
-}
-
-/**
- * @brief      Get http request fragment in uri
- * @return     Return the fragment part of an uri (excluding the leading "#"), or NULL if it has no fragment set .
- */
-std::string EVHttpServer::HttpReq::fragment() const
-{
-    const struct evhttp_uri * pUri = evhttp_request_get_evhttp_uri(m_request);
-    const char * fragment = evhttp_uri_get_fragment(pUri);
-    return (fragment != nullptr) ? fragment : "";
 }
 
 /**
