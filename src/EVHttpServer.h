@@ -48,8 +48,8 @@
  */
 
 /**
- * @brief EVHttpServer is an http server implemented by encapsulating libevent
- * using c++11, It provides:
+ * @brief EVHttp Server is just an http server implemented by encapsulating
+ * libevent using c++, It provides:
  * - Simpler api
  * - Use thread pool to handle http requests
  * - Support regular matching path
@@ -95,9 +95,9 @@ public:
     private:
         HttpReq(const HttpReq &) = delete;
         HttpReq & operator = (const HttpReq &) = delete;
-        friend EVHttpServer;
         HttpReq(evhttp_request * req);
         struct evhttp_request * m_request = nullptr;
+        friend EVHttpServer;
     };
 
     /**
@@ -107,9 +107,6 @@ public:
      */
     class HttpRes
     {
-        HttpRes(evhttp_request * req);
-        struct evhttp_request * m_request = nullptr;
-        bool m_initBody = false;
     public:
         bool setBody(const std::string & body);
         bool addHeader(const HttpKeyVal & header);
@@ -121,12 +118,15 @@ public:
     private:
         HttpRes(const HttpRes &) = delete;
         HttpRes & operator = (const HttpRes &) = delete;
+        HttpRes(evhttp_request * req);
     private:
         int getCode(void) const;
         const char * getReason(void) const;
     private:
         int m_code = HTTP_OK;
         std::string m_reason;
+        struct evhttp_request * m_request = nullptr;
+        bool m_initBody = false;
         friend EVHttpServer;
     };
 

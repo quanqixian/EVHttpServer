@@ -2,7 +2,7 @@
 
 # Introduction
 
-EVHttpServer is an http server implemented by encapsulating libevent using c++11, It provides:
+EVHttp Server is just an http server implemented by encapsulating libevent using c++, It provides:
 
 - Simpler api
 
