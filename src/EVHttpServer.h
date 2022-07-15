@@ -48,7 +48,7 @@
  */
 
 /**
- * @brief EVHttp Server is just an http server implemented by encapsulating
+ * @brief EVHttpServer is just an http server implemented by encapsulating
  * libevent using c++, It provides:
  * - Simpler api
  * - Use thread pool to handle http requests
