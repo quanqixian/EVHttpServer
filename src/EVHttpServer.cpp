@@ -453,7 +453,7 @@ EVHttpServer::~EVHttpServer()
 }
 
 /**
- * @brief      Add a handler for regular resources.
+ * @brief      Add a handler for "regex path".
  * @param[in]  reqArg : http request parameters, including request method and path, see @ref PathAndMethod for details 
  * @param[in]  handler : callback function
  * @param[in]  arg : User-defined parameters
@@ -516,7 +516,7 @@ bool EVHttpServer::addRegHandler(const PathAndMethod & reqArg, const ReqHandler 
 }
 
 /**
- * @brief      Remove handlers for regular resources
+ * @brief      Remove handlers for "regex path"
  * @param[in]  reqArg : http request parameters, including request method and path, see @ref PathAndMethod for details 
  * @retval     true : success
  * @retval     false : failed
