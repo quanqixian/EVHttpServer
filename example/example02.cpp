@@ -91,7 +91,7 @@ void handleFunRemoveTest(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRe
 
     EVHttpServer::PathAndMethod reqArg;
     reqArg.method = EVHTTP_REQ_POST;
-    reqArg.url = "/api/removeAfterhandle";
+    reqArg.path = "/api/removeAfterhandle";
     g_server.rmHandler(reqArg);
 }
 
@@ -114,7 +114,7 @@ int main(int argc, const char *argv[])
     ret = ret && g_server.addHandler({EVHTTP_REQ_POST, "/api/fun1"}, handleFunc, (void*)str);
     ret = ret && g_server.addHandler({EVHTTP_REQ_POST, "/api/removeAfterhandle"}, handleFunRemoveTest, (void*)str);
 
-    /* url 正则匹配测试 */
+    /* path 正则匹配测试 */
     ret = ret && g_server.addRegHandler({EVHTTP_REQ_POST, "/api/fun[1-9]+"}, handleFunc, (void*)str);
 
     ret = ret && g_server.init(port);
