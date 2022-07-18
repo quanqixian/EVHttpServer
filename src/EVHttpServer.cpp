@@ -103,7 +103,7 @@ bool EVHttpServer::init(const std::list<unsigned int> & portList, const std::str
 
             if(0 != evhttp_bind_socket(pEvhttp, ip.c_str(), port))
             {
-                EVLOG_ERROR(-1, "evhttp_bind_socket failed, %s:%d", ip.c_str(), port);
+                EVLOG_ERROR(-1, "evhttp_bind_socket failed, %s:%u", ip.c_str(), port);
                 ret = false;
                 break;
             }
@@ -206,7 +206,7 @@ bool EVHttpServer::start(unsigned int threadNum)
     }
     else
     {
-        EVLOG_WARN(0, "Parameter threadNum:%d, not use thread pool.", threadNum);
+        EVLOG_WARN(0, "Parameter threadNum:%u, not use thread pool.", threadNum);
     }
 
     /* Create dispatch thread */
