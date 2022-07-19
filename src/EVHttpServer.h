@@ -156,7 +156,7 @@ public:
     virtual ~EVHttpServer();
     bool init(const unsigned int port, const std::string & ip = "0.0.0.0");
     bool init(const std::list<unsigned int> & portList, const std::string & ip = "0.0.0.0");
-    bool start(unsigned int threadNum = 5);
+    bool start(const unsigned int threadNum = 5);
     bool stop();
     bool addHandler(const PathAndMethod & reqArg, const ReqHandler & handler, void * arg = nullptr);
     bool rmHandler(const PathAndMethod & reqArg);

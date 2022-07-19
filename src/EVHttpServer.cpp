@@ -182,7 +182,7 @@ bool EVHttpServer::deInit()
  * @retval     true : success 
  * @retval     false : failed
  */
-bool EVHttpServer::start(unsigned int threadNum)
+bool EVHttpServer::start(const unsigned int threadNum)
 {
     std::lock_guard<std::mutex> locker(m_mutex);
 
