@@ -13,7 +13,7 @@ EVHttpServer is just an http server implemented by encapsulating libevent using 
 
 # Examples 
 
-Here is a simple example using EVHttpServer:
+Here is a simple example of using EVHttpServer:
 
 ```c++
 #include "EVHttpServer.h"
