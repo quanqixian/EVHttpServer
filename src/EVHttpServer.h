@@ -1,12 +1,7 @@
 #ifndef _EVHTTP_SERVER_H_
 #define _EVHTTP_SERVER_H_
 
-#include <event2/event.h>
-#include <event2/listener.h>
 #include <event2/http.h>
-#include <event2/keyvalq_struct.h>
-#include <event2/buffer.h>
-
 #include <string>
 #include <unordered_map>
 #include <functional>
@@ -14,7 +9,6 @@
 #include <thread>
 #include <list>
 #include <regex>
-
 #include "ThreadPool.h"
 
 /**
