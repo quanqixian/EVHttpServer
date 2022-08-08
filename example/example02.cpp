@@ -90,7 +90,7 @@ void handleFunRemoveTest(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRe
     std::cout << "handleFunRemoveTest" << std::endl;
 
     EVHttpServer::PathAndMethod reqArg;
-    reqArg.method = EVHTTP_REQ_POST;
+    reqArg.method = EVHttpServer::REQ_POST;
     reqArg.path = "/api/removeAfterhandle";
     g_server.rmHandler(reqArg);
 }
@@ -111,11 +111,11 @@ int main(int argc, const char *argv[])
     const char *str = "user string arg";
     int port = 9999;
 
-    ret = ret && g_server.addHandler({EVHTTP_REQ_POST, "/api/fun1"}, handleFunc, (void*)str);
-    ret = ret && g_server.addHandler({EVHTTP_REQ_POST, "/api/removeAfterhandle"}, handleFunRemoveTest, (void*)str);
+    ret = ret && g_server.addHandler({EVHttpServer::REQ_POST, "/api/fun1"}, handleFunc, (void*)str);
+    ret = ret && g_server.addHandler({EVHttpServer::REQ_POST, "/api/removeAfterhandle"}, handleFunRemoveTest, (void*)str);
 
     /* path 正则匹配测试 */
-    ret = ret && g_server.addRegHandler({EVHTTP_REQ_POST, "/api/fun[1-9]+"}, handleFunc, (void*)str);
+    ret = ret && g_server.addRegHandler({EVHttpServer::REQ_POST, "/api/fun[1-9]+"}, handleFunc, (void*)str);
 
     ret = ret && g_server.init(port);
     ret = ret && g_server.start(5); /* 启动并运行5个事件处理线程 */

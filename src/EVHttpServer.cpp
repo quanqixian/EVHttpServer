@@ -1,6 +1,7 @@
 #include "EVHttpServer.h"
 #include <memory>
 #include <cstring>
+#include <event2/http.h>
 #include "event2/thread.h"
 #include "event2/http_struct.h"
 #include <event2/event.h>
@@ -317,7 +318,7 @@ void EVHttpServer::handleHttpEvent(struct evhttp_request * request, void * arg)
     const struct evhttp_uri * pUri = evhttp_request_get_evhttp_uri(request);
     const char * path = evhttp_uri_get_path(pUri);
     reqArg.path = (path != nullptr) ? path : "";
-    reqArg.method = evhttp_request_get_command(request);
+    reqArg.method = static_cast<ReqType>(evhttp_request_get_command(request));
 
     pThis->m_mutex.lock();
 
@@ -560,11 +561,11 @@ EVHttpServer::HttpReq::HttpReq(evhttp_request * req) : m_request(req)
 
 /**
  * @brief      Get http request method
- * @return     The return value is the enumeration type of evhttp_cmd_type
+ * @return     The return value is the enumeration type of ReqType
  */
-evhttp_cmd_type EVHttpServer::HttpReq::method() const
+EVHttpServer::ReqType EVHttpServer::HttpReq::method() const
 {
-    return evhttp_request_get_command(m_request);
+    return static_cast<ReqType>(evhttp_request_get_command(m_request));
 }
 
 /**
@@ -580,7 +581,7 @@ std::string EVHttpServer::HttpReq::host() const
 
 /**
  * @brief      Get http request method string
- * @return     The return value is after converting the evhttp_cmd_type enumeration 
+ * @return     The return value is after converting the ReqType(evhttp_cmd_type) enumeration 
  * type to a string, as listed below:
  * "GET","POST","HEAD","PUT","DELETE","OPTIONS","TRACE","CONNECT","PATCH"
  */

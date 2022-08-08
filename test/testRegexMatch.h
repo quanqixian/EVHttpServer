@@ -18,7 +18,7 @@ TEST(testRegexMatch, testRegexMatch)
         static void postHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
-            EXPECT_EQ(req.method(), EVHTTP_REQ_POST);
+            EXPECT_EQ(req.method(), EVHttpServer::REQ_POST);
             EXPECT_EQ(req.methodStr(), "POST");
 
             EXPECT_EQ(req.path(), "/api/postHandle777");
@@ -83,7 +83,7 @@ TEST(testRegexMatch, testRegexMatch)
         static void putHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
-            EXPECT_EQ(req.method(), EVHTTP_REQ_PUT);
+            EXPECT_EQ(req.method(), EVHttpServer::REQ_PUT);
             EXPECT_EQ(req.methodStr(), "PUT");
 
             EXPECT_EQ(req.path(), "/api/putHandle88_66");
@@ -148,7 +148,7 @@ TEST(testRegexMatch, testRegexMatch)
         static void getHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
-            EXPECT_EQ(req.method(), EVHTTP_REQ_GET);
+            EXPECT_EQ(req.method(), EVHttpServer::REQ_GET);
             EXPECT_EQ(req.methodStr(), "GET");
 
             EXPECT_EQ(req.path(), "/api/getHandle7x");
@@ -209,7 +209,7 @@ TEST(testRegexMatch, testRegexMatch)
         static void deleteHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             bool * pFlag = static_cast<bool *>(arg);
-            EXPECT_EQ(req.method(), EVHTTP_REQ_DELETE);
+            EXPECT_EQ(req.method(), EVHttpServer::REQ_DELETE);
             EXPECT_EQ(req.methodStr(), "DELETE");
 
             EXPECT_EQ(req.path(), "/api/deleteHandleFunction");
@@ -276,10 +276,10 @@ TEST(testRegexMatch, testRegexMatch)
     volatile bool flag = false;
     EVHttpServer server;
     EXPECT_EQ(server.init(9999, "0.0.0.0"), true);
-    EXPECT_EQ(server.addRegHandler({EVHTTP_REQ_POST, "/api/postHandle[1-9]+"}, Handle::postHandle, (void *)&flag), true);
-    EXPECT_EQ(server.addRegHandler({EVHTTP_REQ_PUT, "/api/putHandle[1-9]+_[1-9]+"}, Handle::putHandle, (void *)&flag), true);
-    EXPECT_EQ(server.addRegHandler({EVHTTP_REQ_GET, "/api/getHandle[1-9]x$"}, Handle::getHandle, (void *)&flag), true);
-    EXPECT_EQ(server.addRegHandler({EVHTTP_REQ_DELETE, "/api/deleteHandle[A-z]+"}, Handle::deleteHandle, (void *)&flag), true);
+    EXPECT_EQ(server.addRegHandler({EVHttpServer::REQ_POST, "/api/postHandle[1-9]+"}, Handle::postHandle, (void *)&flag), true);
+    EXPECT_EQ(server.addRegHandler({EVHttpServer::REQ_PUT, "/api/putHandle[1-9]+_[1-9]+"}, Handle::putHandle, (void *)&flag), true);
+    EXPECT_EQ(server.addRegHandler({EVHttpServer::REQ_GET, "/api/getHandle[1-9]x$"}, Handle::getHandle, (void *)&flag), true);
+    EXPECT_EQ(server.addRegHandler({EVHttpServer::REQ_DELETE, "/api/deleteHandle[A-z]+"}, Handle::deleteHandle, (void *)&flag), true);
     EXPECT_EQ(server.start(5), true);
 
     flag = false;
@@ -335,7 +335,7 @@ TEST(testRegexMatch, testErrorRegex)
     EVHttpServer server;
 
     /* Test add null handler */
-    EXPECT_EQ(server.addRegHandler({EVHTTP_REQ_POST, "/api/fun]}{["}, Handle::handleFunc, nullptr), false);
+    EXPECT_EQ(server.addRegHandler({EVHttpServer::REQ_POST, "/api/fun]}{["}, Handle::handleFunc, nullptr), false);
 }
 
 #endif

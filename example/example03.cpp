@@ -22,7 +22,7 @@ int main(int argc, const char *argv[])
 {
     EVHttpServer server;
 
-    server.addHandler({EVHTTP_REQ_POST, "/api/fun"}, func);
+    server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, func);
 
     /* Initialize multiple ports */
     server.init({7777, 8888, 9999});

@@ -23,7 +23,7 @@ int main(int argc, const char *argv[])
     EVHttpServer server;
 
     /* Add a handler for "regex path" */
-    server.addRegHandler({EVHTTP_REQ_POST, "/api/fun[1-9]+"}, func);
+    server.addRegHandler({EVHttpServer::REQ_POST, "/api/fun[1-9]+"}, func);
     server.init(9999);
     server.start();
 

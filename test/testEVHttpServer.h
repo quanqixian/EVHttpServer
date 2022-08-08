@@ -86,15 +86,15 @@ TEST(testEVHttpServer, testMultipleCall)
         }
     };
 
-    EXPECT_EQ(server.addHandler({EVHTTP_REQ_POST, "/api/fun1"}, Handle::handleFunc, nullptr), true);
-    EXPECT_EQ(server.addHandler({EVHTTP_REQ_POST, "/api/fun1"}, Handle::handleFunc, nullptr), false);
-    EXPECT_EQ(server.rmHandler({EVHTTP_REQ_POST, "/api/fun1"}), true);
-    EXPECT_EQ(server.rmHandler({EVHTTP_REQ_POST, "/api/fun1"}), false);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/fun1"}, Handle::handleFunc, nullptr), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/fun1"}, Handle::handleFunc, nullptr), false);
+    EXPECT_EQ(server.rmHandler({EVHttpServer::REQ_POST, "/api/fun1"}), true);
+    EXPECT_EQ(server.rmHandler({EVHttpServer::REQ_POST, "/api/fun1"}), false);
 
-    EXPECT_EQ(server.addRegHandler({EVHTTP_REQ_POST, "/api/fun[1-9]+"}, Handle::handleFunc, nullptr), true);
-    EXPECT_EQ(server.addRegHandler({EVHTTP_REQ_POST, "/api/fun[1-9]+"}, Handle::handleFunc, nullptr), false);
-    EXPECT_EQ(server.rmRegHandler({EVHTTP_REQ_POST, "/api/fun[1-9]+"}), true);
-    EXPECT_EQ(server.rmRegHandler({EVHTTP_REQ_POST, "/api/fun[1-9]+"}), false);
+    EXPECT_EQ(server.addRegHandler({EVHttpServer::REQ_POST, "/api/fun[1-9]+"}, Handle::handleFunc, nullptr), true);
+    EXPECT_EQ(server.addRegHandler({EVHttpServer::REQ_POST, "/api/fun[1-9]+"}, Handle::handleFunc, nullptr), false);
+    EXPECT_EQ(server.rmRegHandler({EVHttpServer::REQ_POST, "/api/fun[1-9]+"}), true);
+    EXPECT_EQ(server.rmRegHandler({EVHttpServer::REQ_POST, "/api/fun[1-9]+"}), false);
 }
 
 /**
@@ -105,12 +105,12 @@ TEST(testEVHttpServer, testHandlerFunctions)
     EVHttpServer server;
 
     /* Test add null handler */
-    EXPECT_EQ(server.addHandler({EVHTTP_REQ_POST, "/api/fun1"}, nullptr, nullptr), false);
-    EXPECT_EQ(server.addRegHandler({EVHTTP_REQ_POST, "/api/fun[1-9]+"}, nullptr, nullptr), false);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/fun1"}, nullptr, nullptr), false);
+    EXPECT_EQ(server.addRegHandler({EVHttpServer::REQ_POST, "/api/fun[1-9]+"}, nullptr, nullptr), false);
 
     /* Test removal of unadded requests */
-    EXPECT_EQ(server.rmHandler({EVHTTP_REQ_POST, "/api/fun2"}), false);
-    EXPECT_EQ(server.rmRegHandler({EVHTTP_REQ_POST, "/api/fun2[1-9]+"}), false);
+    EXPECT_EQ(server.rmHandler({EVHttpServer::REQ_POST, "/api/fun2"}), false);
+    EXPECT_EQ(server.rmRegHandler({EVHttpServer::REQ_POST, "/api/fun2[1-9]+"}), false);
 }
 
 #endif
