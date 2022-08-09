@@ -9,6 +9,7 @@
 #include <event2/keyvalq_struct.h>
 #include <event2/buffer.h>
 #include <signal.h>
+#include "ThreadPool.h"
 
 #define EVLOG_FATAL(errnum, fmt, ...) printf("[F] %s:%d [%s] errnum=%d " fmt "\n", __FILE__, __LINE__, __FUNCTION__, errnum, ##__VA_ARGS__)
 #define EVLOG_ERROR(errnum, fmt, ...) printf("[E] %s:%d [%s] errnum=%d " fmt "\n", __FILE__, __LINE__, __FUNCTION__, errnum, ##__VA_ARGS__)

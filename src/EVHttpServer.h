@@ -8,7 +8,6 @@
 #include <thread>
 #include <list>
 #include <regex>
-#include "ThreadPool.h"
 
 /**
  * @def   USE_LINUX_REGEX_API
@@ -24,6 +23,13 @@
     #include <sys/types.h>
     #include <regex.h>
 #endif
+
+/**
+ * @brief ThreadPool is a data type in ThreadPool.h, 
+ * In order to minimize compilation dependencies between files, 
+ * use declarations instead of include header files.
+ */
+class ThreadPool;
 
 /**
  * @brief evhttp_request is a data type in libevent. 
