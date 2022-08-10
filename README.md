@@ -42,7 +42,7 @@ int main(int argc, const char *argv[])
 {
     EVHttpServer server;
 
-    server.addHandler({EVHTTPServer::REQ_POST, "/api/fun"}, func);
+    server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, func);
     server.init(9999);
     server.start();
 

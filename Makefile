@@ -1,10 +1,12 @@
+LIBEVENT_DIR=$(shell dirname `find ./thirdparty/libevent/install/  -name libevent.a`)
+
 all: thirdParty unitTest
 
 .PHONY:help
 help:
 	@echo ""
 	@echo "make          : compile third party libs and unit test"
-	@echo "make unitTest : run unit test"
+	@echo "make runTest : run unit test"
 	@echo "make report   : generate code coverage report and test result report"
 	@echo ""
 
@@ -35,10 +37,29 @@ report:thirdParty
 	@echo ""
 	@echo  "\033[42;37m    Html report is generated in directory: $(REPORT_DIR)    \033[0m"
 
+DOXYGEN_DOC_DIR=./menu
+.PHONY:doxygenDoc
+doxygenDoc:
+	cd ./doc/doxygen/; doxygen ./Doxyfile; cp ../menu/ ../../$(DOXYGEN_DOC_DIR) -raf; cd ../../
+
+libs:
+	make -C ./src/ 
+
+.PHONY:install
+install:thirdparty libs doxygenDoc
+	mkdir -p ./install/lib ./install/include ./install/doc
+	cp $(LIBEVENT_DIR)/*.so* ./install/lib -raf
+	cp $(LIBEVENT_DIR)/*.a   ./install/lib -raf
+	cp ./src/*.so* ./install/lib -raf
+	cp ./src/*.a   ./install/lib -raf
+	cp ./src/EVHttpServer.h ./install/include/ -raf
+	cp $(DOXYGEN_DOC_DIR)/html/*  ./install/doc/ -raf
+
 .PHONY:clean
 clean:
 	@cd ./thirdparty/googletest/; ./build.sh clean
 	@cd ./thirdparty/libevent/; ./build.sh clean
 	make -C ./test/ clean
 	rm -rf $(REPORT_DIR)
+	rm -rf $(DOXYGEN_DOC_DIR)
 
