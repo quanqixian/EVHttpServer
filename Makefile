@@ -1,6 +1,6 @@
 LIBEVENT_DIR=$(shell dirname `find ./thirdparty/libevent/install/  -name libevent.a`)
 
-all: thirdParty unitTest
+all: thirdParty unitTest libs doxygenDoc
 
 .PHONY:help
 help:

@@ -10,9 +10,10 @@
 
 /**
  * @def   USE_LINUX_REGEX_API
- * @brief Since some compilers are not good at implementing regular expressions in C++11,
+ * @brief Some compilers are not good at implementing regular expressions in C++11,
  * Under linux, default choose to use the system api to support path regular matching,
  * There is also an option to use the regex support in C++11.
+ * The value of this macro can only be modified before compiling the EVHttpServer source code.
  */
 #define USE_LINUX_REGEX_API (1)
 
