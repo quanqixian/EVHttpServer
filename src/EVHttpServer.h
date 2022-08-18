@@ -7,6 +7,7 @@
 #include <thread>
 #include <list>
 #include <regex>
+#include <memory>
 
 /**
  * @def   USE_LINUX_REGEX_API
@@ -98,6 +99,7 @@ public:
         std::string methodStr() const;
         std::string path() const;
         std::string body() const;
+        std::unique_ptr<char[]> bodyRaw() const;
         std::string uri() const;
         std::string host() const;
 

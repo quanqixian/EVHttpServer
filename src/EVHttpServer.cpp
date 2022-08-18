@@ -1,5 +1,4 @@
 #include "EVHttpServer.h"
-#include <memory>
 #include <cstring>
 #include <signal.h>
 #include "event2/http.h"
@@ -680,6 +679,21 @@ std::string EVHttpServer::HttpReq::body() const
     }
 #endif
 
+}
+
+/**
+ * @brief      Get http request body raw data
+ * @return     std::unique_ptr which provides raw data of body
+ */
+std::unique_ptr<char[]> EVHttpServer::HttpReq::bodyRaw() const
+{
+    evbuffer * inputBuf = evhttp_request_get_input_buffer(m_request);
+    int bufLen = evbuffer_get_length(inputBuf);
+
+    char * bufIn = new char[bufLen + 1];
+    evbuffer_copyout(inputBuf, bufIn, bufLen);
+    bufIn[bufLen] = 0;
+    return std::unique_ptr<char[]>(bufIn);
 }
 
 /**
