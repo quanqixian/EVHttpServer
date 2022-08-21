@@ -6,4 +6,5 @@
 | [example02](example02.cpp) | Example of using  HttpReq and HttpRes    |
 | [example03](example03.cpp) | Initialize multiple ports                |
 | [example04](example04.cpp) | Example of using regex in path           |
+| [example05](example05.cpp) | Example of using lambda as request callback|
 
