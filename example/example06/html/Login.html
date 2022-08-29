@@ -1,0 +1,57 @@
+<!DOCTYPE HTML PUBLIC "-//W3C/DTD HTML 4.0 Transitional//EN">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title> Login </title>
+		<style> h1{text-align:center;color:#88B04B;padding-top:100px;} 
+                .dd{color:#FFF;text-align:center;}
+                .de{border:1px solid white; border-radius:5px;background-color:rgba(255,255,255,0.2);width:260px;height:30px; margin:5px 0;} 
+                .df{border:1px solid white; border-radius:8px;font-size:15px;background-color:#FFF;color:#88B04B;width:60px;height:30px;margin:5px 20px;} 
+        </style>
+        <script>
+            function checkForm() {
+                var username = document.getElementById('username');
+                var password = document.getElementById('password');
+                if( (username.value.length < 1) ||  (password.value.length < 1) )
+                {
+                    username.value = "";
+                    password.value = "";
+                    console.log("Error parameters");
+                    alert("Error parameters");
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+        </script>
+	</head>
+	<body bgcolor="#ebeef0">
+		<div>
+			<h1>Login</h1>
+			<form onsubmit="return checkForm()" action="/checkLogin" method="post" >
+				<table width="350" bgcolor="#A2CD5A" style="padding:10px; margin:0 auto;" border="0">
+					<tr align=left>
+						<td class="dd">username:</td>
+						<td>
+							<input type="text" name="username" id="username" class="de">
+						</td>
+					</tr>
+					<tr align=left>
+						<td class="dd">password:</td>
+						<td>
+							<input type="password" name="password" id="password" class="de">
+						</td>
+					</tr>
+					<tr align=center>
+						<td colspan="2">
+							<input type="submit" value="login" class="df">
+							<input type="reset" value="reset" class="df">
+						</td>
+					</tr>
+				</table>
+			</form>
+		</div>
+	</body>
+</html>
