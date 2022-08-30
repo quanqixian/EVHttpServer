@@ -15,6 +15,14 @@ void sighandler(int signum)
     g_runFlag = false;
 }
 
+/**
+ * @brief      get query parameter from string
+ * @param[in]  pStr : string pointer 
+ * @param[in]  key : key to find
+ * @param[out] value : use to save result
+ * @retval     true : success
+ * @retval     false : failed
+ */
 bool getQuery(const char * pStr, const char * key, std::string & value)
 {
     bool ret = true;
@@ -27,7 +35,7 @@ bool getQuery(const char * pStr, const char * key, std::string & value)
     ret = ret && ('=' == *(p + len));
     if(!ret)
     {
-        return false;
+        return ret;
     }
 
     char *pBegin = p + len + 1;
@@ -53,6 +61,11 @@ bool getQuery(const char * pStr, const char * key, std::string & value)
     return ret;
 }
 
+/**
+ * @brief      Read file to buffer
+ * @param[in]  fileName : name of file
+ * @return     a smart pointer to buffer
+ */
 std::unique_ptr<char[]> readFile(const std::string & fileName)
 {
     std::ifstream ifStm (fileName, std::ifstream::binary);
@@ -67,6 +80,13 @@ std::unique_ptr<char[]> readFile(const std::string & fileName)
     return buffer;
 }
 
+/**
+ * @brief      Login callback handler
+ * @param[in]  req : http request
+ * @param[out] res : http response
+ * @param[in]  arg : User-defined parameters
+ * @return     void
+ */
 void loginCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
 {
     std::unique_ptr<char[]> buffer = readFile("./html/Login.html");
@@ -75,13 +95,28 @@ void loginCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & re
     res.setBody(buffer.get());
 }
 
+/**
+ * @brief      Get parameters callback handler
+ * @param[in]  req : http request
+ * @param[out] res : http response
+ * @param[in]  arg : User-defined parameters
+ * @return     void
+ */
 void getParametersCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
 {
     char buf[256] = {0};
+    res.addHeader({"Content-Type","application/json"});
     snprintf(buf, sizeof(buf), "{\"parameterA\":\"%s\",\"parameterB\":\"%s\"}", g_parameterA.c_str(), g_parameterB.c_str());
     res.setBody(buf);
 }
 
+/**
+ * @brief      Check login callback handler
+ * @param[in]  req : http request
+ * @param[out] res : http response
+ * @param[in]  arg : User-defined parameters
+ * @return     void
+ */
 void checkLoginCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
 {
     bool ret = true;
@@ -104,6 +139,13 @@ void checkLoginCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes
     }
 }
 
+/**
+ * @brief      Save parameters callback handler
+ * @param[in]  req : http request
+ * @param[out] res : http response
+ * @param[in]  arg : User-defined parameters
+ * @return     void
+ */
 void saveCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
 {
     bool ret = true;
