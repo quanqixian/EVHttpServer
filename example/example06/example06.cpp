@@ -21,6 +21,7 @@ bool getQuery(const char * pStr, const char * key, std::string & value)
     char * p = strstr((char *)pStr, key);
     ret = ret && (nullptr != p);
     ret = ret && (nullptr != (p + len));
+    ret = ret && (nullptr != (p + len + 1));
     ret = ret && ('=' == *(p + len));
     if(!ret)
     {
@@ -75,46 +76,46 @@ void loginCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & re
 
 void checkLoginCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
 {
-	bool ret = true;
-	std::string username;
-	std::string password;
+    bool ret = true;
+    std::string username;
+    std::string password;
 
-	ret = ret && getQuery(req.body().c_str(), "username", username);
-	ret = ret && getQuery(req.body().c_str(), "password", password);
-	ret = ret && (username == "admin");
-	ret = ret && (password == "123456");
-	if(!ret)
-	{
-		std::unique_ptr<char[]> buffer = readFile("./html/ReLogin.html");
-		res.setBody(buffer.get());
-	}
-	else
-	{
-		std::unique_ptr<char[]> buffer = readFile("./html/Configure.html");
-		res.setBody(buffer.get());
-	}
+    ret = ret && getQuery(req.body().c_str(), "username", username);
+    ret = ret && getQuery(req.body().c_str(), "password", password);
+    ret = ret && (username == "admin");
+    ret = ret && (password == "123456");
+    if(!ret)
+    {
+        std::unique_ptr<char[]> buffer = readFile("./html/ReLogin.html");
+        res.setBody(buffer.get());
+    }
+    else
+    {
+        std::unique_ptr<char[]> buffer = readFile("./html/Configure.html");
+        res.setBody(buffer.get());
+    }
 }
 
 void saveCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
 {
-	bool ret = true;
-	std::string parameterA;
-	std::string parameterB;
+    bool ret = true;
+    std::string parameterA;
+    std::string parameterB;
 
-	ret = ret && getQuery(req.body().c_str(), "parameterA", parameterA);
-	ret = ret && getQuery(req.body().c_str(), "parameterB", parameterB);
-	ret = ret && (parameterA == "123");
-	ret = ret && (parameterB == "123");
-	if(!ret)
-	{
-		std::unique_ptr<char[]> buffer = readFile("./html/Fail.html");
-		res.setBody(buffer.get());
-	}
-	else
-	{
-		std::unique_ptr<char[]> buffer = readFile("./html/Success.html");
-		res.setBody(buffer.get());
-	}
+    ret = ret && getQuery(req.body().c_str(), "parameterA", parameterA);
+    ret = ret && getQuery(req.body().c_str(), "parameterB", parameterB);
+    ret = ret && (parameterA == "123");
+    ret = ret && (parameterB == "123");
+    if(!ret)
+    {
+        std::unique_ptr<char[]> buffer = readFile("./html/Fail.html");
+        res.setBody(buffer.get());
+    }
+    else
+    {
+        std::unique_ptr<char[]> buffer = readFile("./html/Success.html");
+        res.setBody(buffer.get());
+    }
 }
 
 int main(int argc, const char *argv[])
