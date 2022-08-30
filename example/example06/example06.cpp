@@ -7,6 +7,8 @@
 #include <cstring>
 
 static volatile bool g_runFlag = true;
+static std::string g_parameterA = "test";
+static std::string g_parameterB = "123";
 
 void sighandler(int signum)
 {
@@ -27,7 +29,6 @@ bool getQuery(const char * pStr, const char * key, std::string & value)
     {
         return false;
     }
-
 
     char *pBegin = p + len + 1;
     char *pEnd = pBegin;
@@ -74,6 +75,13 @@ void loginCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & re
     res.setBody(buffer.get());
 }
 
+void getParametersCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+{
+    char buf[256] = {0};
+    snprintf(buf, sizeof(buf), "{\"parameterA\":\"%s\",\"parameterB\":\"%s\"}", g_parameterA.c_str(), g_parameterB.c_str());
+    res.setBody(buf);
+}
+
 void checkLoginCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
 {
     bool ret = true;
@@ -104,8 +112,6 @@ void saveCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res
 
     ret = ret && getQuery(req.body().c_str(), "parameterA", parameterA);
     ret = ret && getQuery(req.body().c_str(), "parameterB", parameterB);
-    ret = ret && (parameterA == "123");
-    ret = ret && (parameterB == "123");
     if(!ret)
     {
         std::unique_ptr<char[]> buffer = readFile("./html/Fail.html");
@@ -113,6 +119,8 @@ void saveCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res
     }
     else
     {
+        g_parameterA = parameterA;
+        g_parameterB = parameterB;
         std::unique_ptr<char[]> buffer = readFile("./html/Success.html");
         res.setBody(buffer.get());
     }
@@ -123,6 +131,7 @@ int main(int argc, const char *argv[])
     EVHttpServer server;
 
     server.addHandler({EVHttpServer::REQ_GET, "/"}, loginCallback);
+    server.addHandler({EVHttpServer::REQ_GET, "/getParameters"}, getParametersCallback);
     server.addHandler({EVHttpServer::REQ_POST, "/checkLogin"}, checkLoginCallback);
     server.addHandler({EVHttpServer::REQ_POST, "/save"}, saveCallback);
     server.init(8080);

@@ -11,11 +11,72 @@
                 .df{border:1px solid white;
                 border-radius:8px;font-size:15px;background-color:#FFF;color:#88B04B;width:60px;height:30px;margin:5px 20px;} 
         </style>
+        <script>
+            function checkForm() {
+                var parameterA = document.getElementById('parameterA');
+                var parameterB = document.getElementById('parameterB');
+                if( (parameterA.value.length < 1) ||  (parameterB.value.length < 1) )
+                {
+                    parameterA.value = "";
+                    parameterB.value = "";
+                    console.log("Error parameters");
+                    alert("Error parameters");
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+                
+            }
+            window.onload = function()
+            { 
+                var request;
+                if (window.XMLHttpRequest)
+                {
+                    request = new XMLHttpRequest();
+                }
+                else
+                {
+                    request = new ActiveXObject('Microsoft.XMLHTTP');
+                }
+
+                function success(text) {
+                    var obj = JSON.parse(text);
+                    var parameterA = document.getElementById('parameterA');
+                    var parameterB = document.getElementById('parameterB');
+                    parameterA.value = obj.parameterA;
+                    parameterB.value = obj.parameterB;
+                }
+
+                request.onreadystatechange = function()
+                {
+                    if (request.readyState === 4)
+                    {
+                        if (request.status === 200)
+                        {
+                            return success(request.responseText);
+                        }
+                        else 
+                        {
+                            alert("Request parameters fail");
+                        }
+                    }
+                    else
+                    {
+                        console.log("request ...");
+                    }
+                }
+
+                request.open('GET', '/getParameters');
+                request.send();
+            }
+        </script>
     </head>
     <body bgcolor="#ebeef0">
         <div>
             <h1>Configure Page</h1>
-            <form action="/save" method="post">
+            <form onsubmit="return checkForm()" action="/save" method="post">
                 <table width="400" bgcolor="#A2CD5A" style="padding:10px; margin:0 auto;" border="0">
                     <tr align=left>
                         <td class="dd">parameter a:</td>
