@@ -28,11 +28,10 @@ bool getQuery(const char * pStr, const char * key, std::string & value)
     bool ret = true;
 
     int len = strlen(key);
-    char * p = strstr((char *)pStr, key);
+    std::string str = std::string(key) + "="; 
+    char * p = strstr((char *)pStr, str.c_str());
     ret = ret && (nullptr != p);
-    ret = ret && (nullptr != (p + len));
     ret = ret && (nullptr != (p + len + 1));
-    ret = ret && ('=' == *(p + len));
     if(!ret)
     {
         return ret;
@@ -69,15 +68,22 @@ bool getQuery(const char * pStr, const char * key, std::string & value)
 std::unique_ptr<char[]> readFile(const std::string & fileName)
 {
     std::ifstream ifStm (fileName, std::ifstream::binary);
-    std::filebuf * pBuf = ifStm.rdbuf();
-    std::size_t size = pBuf->pubseekoff(0, ifStm.end, ifStm.in);
-    pBuf->pubseekpos(0, ifStm.in);
+    if(ifStm.is_open())
+    {
+        std::filebuf * pBuf = ifStm.rdbuf();
+        std::size_t size = pBuf->pubseekoff(0, ifStm.end, ifStm.in);
+        pBuf->pubseekpos(0, ifStm.in);
 
-    std::unique_ptr<char[]> buffer(new char[size + 1]);
-    buffer[size] = 0;
-    pBuf->sgetn(buffer.get(),size);
-    ifStm.close();
-    return buffer;
+        std::unique_ptr<char[]> buffer(new char[size + 1]);
+        buffer[size] = 0;
+        pBuf->sgetn(buffer.get(),size);
+        ifStm.close();
+        return buffer;
+    }
+    else
+    {
+        return nullptr;
+    }
 }
 
 /**
@@ -90,9 +96,15 @@ std::unique_ptr<char[]> readFile(const std::string & fileName)
 void loginCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
 {
     std::unique_ptr<char[]> buffer = readFile("./html/Login.html");
-
-    res.addHeader({"Content-Type","text/html;charset:utf-8;"});
-    res.setBody(buffer.get());
+    if(nullptr != buffer.get())
+    {
+        res.addHeader({"Content-Type", "text/html;charset:utf-8;"});
+        res.setBody(buffer.get());
+    }
+    else
+    {
+        res.setCode(404);
+    }
 }
 
 /**
@@ -105,7 +117,7 @@ void loginCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & re
 void getParametersCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
 {
     char buf[256] = {0};
-    res.addHeader({"Content-Type","application/json"});
+    res.addHeader({"Content-Type", "application/json"});
     snprintf(buf, sizeof(buf), "{\"parameterA\":\"%s\",\"parameterB\":\"%s\"}", g_parameterA.c_str(), g_parameterB.c_str());
     res.setBody(buf);
 }
@@ -127,15 +139,29 @@ void checkLoginCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes
     ret = ret && getQuery(req.body().c_str(), "password", password);
     ret = ret && (username == "admin");
     ret = ret && (password == "123456");
-    if(!ret)
+    if(ret)
     {
-        std::unique_ptr<char[]> buffer = readFile("./html/ReLogin.html");
-        res.setBody(buffer.get());
+        std::unique_ptr<char[]> buffer = readFile("./html/Configure.html");
+        if(nullptr != buffer.get())
+        {
+            res.setBody(buffer.get());
+        }
+        else
+        {
+            res.setCode(404);
+        }
     }
     else
     {
-        std::unique_ptr<char[]> buffer = readFile("./html/Configure.html");
-        res.setBody(buffer.get());
+        std::unique_ptr<char[]> buffer = readFile("./html/ReLogin.html");
+        if(nullptr != buffer.get())
+        {
+            res.setBody(buffer.get());
+        }
+        else
+        {
+            res.setCode(404);
+        }
     }
 }
 
@@ -154,17 +180,31 @@ void saveCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res
 
     ret = ret && getQuery(req.body().c_str(), "parameterA", parameterA);
     ret = ret && getQuery(req.body().c_str(), "parameterB", parameterB);
-    if(!ret)
-    {
-        std::unique_ptr<char[]> buffer = readFile("./html/Fail.html");
-        res.setBody(buffer.get());
-    }
-    else
+    if(ret)
     {
         g_parameterA = parameterA;
         g_parameterB = parameterB;
         std::unique_ptr<char[]> buffer = readFile("./html/Success.html");
-        res.setBody(buffer.get());
+        if(nullptr != buffer.get())
+        {
+            res.setBody(buffer.get());
+        }
+        else
+        {
+            res.setCode(404);
+        }
+    }
+    else
+    {
+        std::unique_ptr<char[]> buffer = readFile("./html/Fail.html");
+        if(nullptr != buffer.get())
+        {
+            res.setBody(buffer.get());
+        }
+        else
+        {
+            res.setCode(404);
+        }
     }
 }
 

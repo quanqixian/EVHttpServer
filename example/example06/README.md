@@ -1,6 +1,6 @@
 # 1.Overview
 
-Here is an example of a simple web configuration page implemented using EVHttpServer.
+[Here](./example06.cpp) is an example of a simple web configuration page implemented using EVHttpServer.
 
 # 2.Steps
 
@@ -27,7 +27,7 @@ In the code, the valid username is: `admin` and the password is: `123456`
 
 ## 2.5 Setting parameters
 
-After successful login, you will enter the configuration page. When the page loads, the previously configured value will be obtained. Click Submit to set the new value.
+After successful login, you will enter the configuration page. When the page loads, the previously configured value will be obtained. Click submit to set the new value.
 
 ![configure](./pic/configure.jpg)
 
