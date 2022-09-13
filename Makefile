@@ -37,7 +37,7 @@ report:thirdParty
 	@echo ""
 	@echo  "\033[42;37m    Html report is generated in directory: $(REPORT_DIR)    \033[0m"
 
-DOXYGEN_DOC_DIR=./doc
+DOXYGEN_DOC_DIR=./docs
 .PHONY:doxygenDoc
 doxygenDoc:
 	cd doxygen/; doxygen ./Doxyfile;  cd ../
