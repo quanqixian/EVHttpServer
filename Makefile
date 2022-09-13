@@ -37,10 +37,10 @@ report:thirdParty
 	@echo ""
 	@echo  "\033[42;37m    Html report is generated in directory: $(REPORT_DIR)    \033[0m"
 
-DOXYGEN_DOC_DIR=./menu
+DOXYGEN_DOC_DIR=./doc
 .PHONY:doxygenDoc
 doxygenDoc:
-	cd ./doc/doxygen/; doxygen ./Doxyfile; cp ../output/ ../../$(DOXYGEN_DOC_DIR) -raf; cd ../../
+	cd doxygen/; doxygen ./Doxyfile;  cd ../
 
 libs:
 	make -C ./src/ 
@@ -61,5 +61,5 @@ clean:
 	@cd ./thirdparty/libevent/; ./build.sh clean
 	make -C ./test/ clean
 	rm -rf $(REPORT_DIR)
-	rm -rf $(DOXYGEN_DOC_DIR)
+	rm -rf $(DOXYGEN_DOC_DIR)/*
 

@@ -54,7 +54,7 @@ int main(int argc, const char *argv[])
 }
 ```
 
-See more examples [here](./example)
+See more examples [here](https://github.com/quanqixian/EVHttpServer/tree/master/example)
 
 # Use in your project
 
