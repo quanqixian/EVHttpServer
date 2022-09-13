@@ -40,7 +40,7 @@ report:thirdParty
 DOXYGEN_DOC_DIR=./menu
 .PHONY:doxygenDoc
 doxygenDoc:
-	cd ./doc/doxygen/; doxygen ./Doxyfile; cp ../menu/ ../../$(DOXYGEN_DOC_DIR) -raf; cd ../../
+	cd ./doc/doxygen/; doxygen ./Doxyfile; cp ../output/ ../../$(DOXYGEN_DOC_DIR) -raf; cd ../../
 
 libs:
 	make -C ./src/ 
