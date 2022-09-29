@@ -9,10 +9,10 @@
 #endif
 
 EVHttpServer g_server;
-static volatile bool g_running = true; /* 运行标志位 */
+static volatile bool g_running = true; /* run flag */
 
 /**
- * @brief      Ctrl+C信号的处理函数，用于修改运行标志位退出程序
+ * @brief      Ctrl+C signal processing function, used to modify the running flag to exit the program
  * @param[in]
  * @param[out]
  * @retval
@@ -27,7 +27,7 @@ void sighandler(int signum)
 }
 
 /**
- * @brief      http 请求回调函数
+ * @brief      http request callback function
  * @param[in]
  * @param[out]
  * @retval
@@ -37,10 +37,10 @@ void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, 
     std::list<EVHttpServer::HttpKeyVal> inList;
     std::cout << "Thread id:" << std::this_thread::get_id() << std::endl;
 
-    /* 请求行内容 */
+    /* http request line content */
     std::cout << req.methodStr() << " " << req.path() << std::endl;
 
-    /* 请求头 */
+    /* http request headers */
     req.headers(inList);
     for(auto iter = inList.begin(); iter != inList.end(); ++iter)
     {
@@ -48,7 +48,7 @@ void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, 
     }
     std::cout << std::endl;
 
-    /* 请求参数 */
+    /* http request parameters */
     req.querys(inList);
     for(auto iter = inList.begin(); iter != inList.end(); ++iter)
     {
@@ -56,31 +56,31 @@ void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, 
     }
     std::cout << std::endl;
 
-    /* 请求数据 */
+    /* http request body */
     std::cout << req.body() << std::endl;
 
-    /* 用户注册的回调函数参数 */
+    /* custom parameters passed in when the user registers the callback function */
     std::cout << "arg : " << (const char *)arg << std::endl;
     std::cout << std::endl;
 
-    /* 设置回复头 */
+    /* set http response headers */
     std::list<EVHttpServer::HttpKeyVal> outlist;
     outlist.push_back({"Server", "Apache"});
     outlist.push_back({"Content-Type", "application/json;charset=UTF-8"});
     res.addHeaders(outlist);
 
-    /* 设置回复body */
+    /* set http response body */
     std::string body = R"({"status":"OK", "msg":""})";
     res.setBody(body);
 
-    /* 设置回复码和原因，可不设置使用默认值200 OK */
+    /* set the http reply code and reason. If not set, use the default value of 200 OK */
     res.setCode(200);
     res.setReason("OK");
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 }
 
 /**
- * @brief      这个回调被执行时会移除注册的回调函数
+ * @brief      When this callback is executed, the registered callback function will be removed
  * @param[in]
  * @param[out]
  * @retval
@@ -114,11 +114,11 @@ int main(int argc, const char *argv[])
     ret = ret && g_server.addHandler({EVHttpServer::REQ_POST, "/api/fun1"}, handleFunc, (void*)str);
     ret = ret && g_server.addHandler({EVHttpServer::REQ_POST, "/api/removeAfterhandle"}, handleFunRemoveTest, (void*)str);
 
-    /* path 正则匹配测试 */
+    /* path regular matching test */
     ret = ret && g_server.addRegHandler({EVHttpServer::REQ_POST, "/api/fun[1-9]+"}, handleFunc, (void*)str);
 
     ret = ret && g_server.init(port);
-    ret = ret && g_server.start(5); /* 启动并运行5个事件处理线程 */
+    ret = ret && g_server.start(5); /* Start and run 5 event processing threads */
     if (ret)
     {
         std::cout << "start http server at port:" << port << std::endl;
@@ -129,7 +129,7 @@ int main(int argc, const char *argv[])
         goto EXIT;
     }
 
-    /* 捕获Ctrl+C信号 */
+    /* capture Ctrl+C signal */
     if (signal(SIGINT, sighandler) == SIG_ERR)
     {
         std::cout << "Fail to signal" << std::endl;

@@ -12,18 +12,18 @@ void sighandler(int signum)
 
 int main(int argc, const char *argv[])
 {
-	EVHttpServer server;
-
-	server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, [](const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)->void {
-			std::cout << req.methodStr() << " " << req.path() << std::endl;
-			std::cout << req.body() << std::endl;
-
-			res.setBody(R"({"status":"OK"})");
-			});
+    EVHttpServer server;
     server.init(9999);
     server.start();
 
-    signal(SIGINT, sighandler); 
+    server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, [](const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)->void {
+            std::cout << req.methodStr() << " " << req.path() << std::endl;
+            std::cout << req.body() << std::endl;
+
+            res.setBody(R"({"status":"OK"})");
+            });
+
+    signal(SIGINT, sighandler);
 
     while(g_runFlag)
     {

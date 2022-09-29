@@ -228,7 +228,8 @@ bool EVHttpServer::start(const unsigned int threadNum)
 }
 
 /**
- * @brief      Register the callback handler function corresponding to the http request
+ * @brief      Register the callback handler function corresponding to the http request, 
+ * handlers can be registered both before and after the start function is called.
  * @param[in]  reqArg : http request parameters, including request method and path, see @ref PathAndMethod for details 
  * @param[in]  handler : callback handler function
  * @param[in]  arg : User-defined parameters
@@ -458,7 +459,7 @@ EVHttpServer::~EVHttpServer()
 }
 
 /**
- * @brief      Add a handler for "regex path".
+ * @brief      Add a handler for "regex path", handlers can be registered both before and after the start function is called.
  * @param[in]  reqArg : http request parameters, including request method and path, see @ref PathAndMethod for details 
  * @param[in]  handler : callback function
  * @param[in]  arg : User-defined parameters

@@ -1,6 +1,6 @@
 ![EVHttpServer logo](./Logo01.jpg)
 
-# Introduction
+# 1.Introduction
 
 EVHttpServer is just an http server implemented by encapsulating libevent using c++, It provides:
 
@@ -10,16 +10,24 @@ EVHttpServer is just an http server implemented by encapsulating libevent using 
 
 - Support regular matching path
 
+# 2.Tutorial
 
-# Examples 
+## 2.1 main classes to focus on:
 
-Here is a simple example of using EVHttpServer:
+Using EVHttpServer, there are three main classes to focus on:
+
+- `EVHttpServer` : encapsulates HTTP service initialization, start, stop, and registration callbacks.
+- `EVHttpServer::HttpReq` : encapsulates HTTP requests, and provides methods for obtaining headers, query, and body.
+- `EVHttpServer::HttpRes` : encapsulates the http reply, and provides methods for setting headers and body.
+
+## 2.2 demo
 
 ```c++
 #include "EVHttpServer.h"
 #include <iostream>
 #include <thread>
 #include <signal.h>
+
 static volatile bool g_runFlag = true;
 
 void sighandler(int signum)
@@ -27,37 +35,38 @@ void sighandler(int signum)
     g_runFlag = false;
 }
 
-void func(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
-{
-    std::cout << req.methodStr() << " " << req.path() << std::endl;
-    std::cout << req.body() << std::endl;
-
-    res.setBody(R"({"status":"OK"})");
-    res.setCode(200);
-}
-
 int main(int argc, const char *argv[])
 {
+    /* Create an http server */
     EVHttpServer server;
-
-    server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, func);
+    
+    /*  Initialize http server port */
     server.init(9999);
+
+     /* start http server */
     server.start();
 
-    signal(SIGINT, sighandler); 
+    /*
+     *   Register the http request handler function, the combination of method and path represents a unique request.
+     *   In the request processing function, various parameters of the request can be obtained through the req object,
+     * and parameters such as the body and header of the reply can be set through the res object.
+     */
+    server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, [](const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)->void {
+
+            std::cout << req.methodStr() << " " << req.path() << std::endl;
+            std::cout << req.body() << std::endl;
+
+            res.setBody(R"({"status":"OK"})");
+            });
+
+    signal(SIGINT, sighandler);
 
     while(g_runFlag)
     {
         std::this_thread::sleep_for(std::chrono::seconds(2));
     }
+
     return 0;
 }
 ```
 
-See more examples [here](https://github.com/quanqixian/EVHttpServer/tree/master/example)
-
-# Use in your project
-
-The first way is to include the source code in the src directory into your project, and then give libevent's header file path, library path and rpath when compiling.
-
-The second way is to use EVHttpServer compiled as a library.
