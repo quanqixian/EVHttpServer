@@ -189,6 +189,7 @@ bool EVHttpServer::deInit()
  */
 bool EVHttpServer::start(const unsigned int threadNum)
 {
+    bool ret = true;
     std::lock_guard<std::mutex> locker(m_mutex);
 
     if(m_isRunning)
@@ -197,31 +198,52 @@ bool EVHttpServer::start(const unsigned int threadNum)
         return false;
     }
 
-    /* Create thread pool */
-    if(threadNum > 0)
+    do
     {
-
-        m_threadPool = new(std::nothrow) ThreadPool(threadNum);
-        if(nullptr == m_threadPool)
+        /* Create thread pool */
+        if(threadNum > 0)
         {
-            EVLOG_ERROR(-1, "Create thread pool failed!");
-            return false;
+            m_threadPool = new(std::nothrow) ThreadPool(threadNum);
+            if(nullptr == m_threadPool)
+            {
+                EVLOG_ERROR(-1, "Create thread pool failed!");
+                ret = false;
+                break;
+            }
+            EVLOG_INFO("ThreadPool create thread num:%u", threadNum);
         }
-        EVLOG_INFO("ThreadPool create thread num:%u", threadNum);
-    }
-    else
-    {
-        EVLOG_WARN(0, "Parameter threadNum:%u, not use thread pool.", threadNum);
-    }
+        else
+        {
+            EVLOG_WARN(0, "Parameter threadNum:%u, not use thread pool.", threadNum);
+        }
 
-    /* Create dispatch thread */
-    m_isRunning = true;
+        /* Create dispatch thread */
+        m_isRunning = true;
 
-    m_thread = new(std::nothrow) std::thread(dispatchThread, this);
-    if(nullptr == m_thread)
+        m_thread = new(std::nothrow) std::thread(dispatchThread, this);
+        if(nullptr == m_thread)
+        {
+            m_isRunning = false;
+            EVLOG_ERROR(-1, "Dispatch thread create failed!");
+            ret = false;
+            break;
+        }
+    }while(0);
+
+    if(!ret)
     {
-        EVLOG_ERROR(-1, "Dispatch thread create failed!");
-        m_isRunning = false;
+        if(m_thread)
+        {
+            m_thread->join();
+            delete m_thread;
+            m_thread = nullptr;
+        }
+
+        if(m_threadPool)
+        {
+            delete m_threadPool;
+            m_threadPool = nullptr;
+        }
     }
 
     return m_isRunning;
