@@ -201,7 +201,7 @@ bool EVHttpServer::start(const unsigned int threadNum)
     if(threadNum > 0)
     {
 
-        m_threadPool = new ThreadPool(threadNum);
+        m_threadPool = new(std::nothrow) ThreadPool(threadNum);
         if(nullptr == m_threadPool)
         {
             EVLOG_ERROR(-1, "Create thread pool failed!");
@@ -217,7 +217,7 @@ bool EVHttpServer::start(const unsigned int threadNum)
     /* Create dispatch thread */
     m_isRunning = true;
 
-    m_thread = new std::thread(dispatchThread, this);
+    m_thread = new(std::nothrow) std::thread(dispatchThread, this);
     if(nullptr == m_thread)
     {
         EVLOG_ERROR(-1, "Dispatch thread create failed!");
@@ -666,10 +666,13 @@ std::string EVHttpServer::HttpReq::body() const
     if(bufLen > 1024)
     {
 #endif
-        std::unique_ptr<char[]>bufIn(new char[bufLen]);/* no need memset */
+        std::unique_ptr<char[]>bufIn(new(std::nothrow) char[bufLen]);/* no need memset */
+        if(nullptr == bufIn.get())
+        {
+            return "";
+        }
         evbuffer_copyout(inputBuf, bufIn.get(), bufLen);
-        std::string body = std::string(bufIn.get(), bufLen);
-        return body;
+        return std::string(bufIn.get(), bufLen);
 #ifndef _WIN32
     }
     else
@@ -691,7 +694,11 @@ std::unique_ptr<char[]> EVHttpServer::HttpReq::bodyRaw() const
     evbuffer * inputBuf = evhttp_request_get_input_buffer(m_request);
     int bufLen = evbuffer_get_length(inputBuf);
 
-    char * bufIn = new char[bufLen + 1];
+    char * bufIn = new(std::nothrow) char[bufLen + 1];
+    if(nullptr == bufIn)
+    {
+        return nullptr;
+    }
     evbuffer_copyout(inputBuf, bufIn, bufLen);
     bufIn[bufLen] = 0;
     return std::unique_ptr<char[]>(bufIn);
