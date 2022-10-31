@@ -192,6 +192,12 @@ bool EVHttpServer::start(const unsigned int threadNum)
     bool ret = true;
     std::lock_guard<std::mutex> locker(m_mutex);
 
+    if(!m_isInited)
+    {
+        EVLOG_ERROR(-1, "Start fail, no init.");
+        return false;
+    }
+
     if(m_isRunning)
     {
         EVLOG_ERROR(-1, "Start fail, already started.");
