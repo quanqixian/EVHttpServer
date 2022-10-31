@@ -19,6 +19,7 @@
 #define USE_LINUX_REGEX_API (1)
 
 #ifdef _WIN32
+    #undef USE_LINUX_REGEX_API
     #define USE_LINUX_REGEX_API (0)
 #else
     #include <sys/types.h>
