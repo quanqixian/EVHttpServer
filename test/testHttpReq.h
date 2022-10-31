@@ -686,4 +686,40 @@ TEST(testHttpReq, testbodyRaw)
 
 }
 
+/**
+ * @brief test decode uri
+ */
+TEST(testHttpReq, testDecodeUri)
+{
+    volatile bool flag = false;
+
+    class Handle
+    {
+    public:
+        static void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        {
+            bool * pFlag = static_cast<bool *>(arg);
+            std::string urlExpect = R"(/api/fun?name=你好)";
+            std::string url = req.uri();
+            std::string urlDecode = req.uri(true);
+            EXPECT_NE(urlExpect, url);
+            EXPECT_EQ(urlExpect, urlDecode);
+            *pFlag = true;
+        }
+    };
+
+    EVHttpServer server;
+    EXPECT_EQ(server.init(7777), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, Handle::handleFunc, (void *)&flag), true);
+    ASSERT_EQ(server.start(5), true);
+
+    {
+        flag = false;
+        std::string cmd = R"(curl -i "http://0.0.0.0:7777/api/fun?name=%E4%BD%A0%E5%A5%BD" -d "{\"name\":\"tom\"}" -X POST)";
+        system(cmd.c_str());
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        EXPECT_EQ(flag, true);
+    }
+}
+
 #endif

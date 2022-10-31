@@ -667,12 +667,23 @@ std::string EVHttpServer::HttpReq::path() const
 
 /**
  * @brief      Get http request uri
+ * @param[in]  decode : If decode is equal to true, the decoded uri will be returned
  * @return     uri string
  */
-std::string EVHttpServer::HttpReq::uri() const
+std::string EVHttpServer::HttpReq::uri(bool decode) const
 {
     const char * uri = evhttp_request_get_uri(m_request);
-    return (uri != nullptr) ? uri : "";
+    if(!decode)
+    {
+        return (uri != nullptr) ? uri : "";
+    }
+    else
+    {
+        char * decodedUri = evhttp_uridecode(uri, 1, nullptr);
+        std::string ret = (decodedUri != nullptr) ? decodedUri : "";
+        free(decodedUri);
+        return ret;
+    }
 }
 
 /**

@@ -97,7 +97,7 @@ public:
         std::string path() const;
         std::string body() const;
         std::unique_ptr<char[]> bodyRaw() const;
-        std::string uri() const;
+        std::string uri(bool decode = false) const;
         std::string host() const;
 
         void headers(std::list<HttpKeyVal> & ret) const;
