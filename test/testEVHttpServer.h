@@ -41,6 +41,10 @@ TEST(testEVHttpServer, testStart)
     EVHttpServer server3;
     EXPECT_EQ(server3.init(7777), true);
     EXPECT_EQ(server3.start(0), true);
+
+    EVHttpServer server4;
+    /* test start without init before */
+    EXPECT_EQ(server4.start(5), false);
 }
 
 /**
