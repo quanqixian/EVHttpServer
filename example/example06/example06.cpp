@@ -178,8 +178,16 @@ void saveCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res
     std::string parameterA;
     std::string parameterB;
 
-    ret = ret && getQuery(req.body().c_str(), "parameterA", parameterA);
-    ret = ret && getQuery(req.body().c_str(), "parameterB", parameterB);
+    std::string decodedBody;
+
+    /* there need decode twice */
+    req.decode(req.body(), decodedBody);
+    req.decode(decodedBody, decodedBody);
+    std::cout<<"before decode,body="<<req.body()<<std::endl;
+    std::cout<<"after decode,body="<<decodedBody<<std::endl;
+
+    ret = ret && getQuery(decodedBody.c_str(), "parameterA", parameterA);
+    ret = ret && getQuery(decodedBody.c_str(), "parameterB", parameterB);
     if(ret)
     {
         g_parameterA = parameterA;

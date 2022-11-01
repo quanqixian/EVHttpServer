@@ -684,6 +684,7 @@ std::string EVHttpServer::HttpReq::uri(bool decode) const
         {
             std::string ret = decodedUri;
             free(decodedUri);
+            decodedUri = nullptr;
             return ret;
         }
         return "";

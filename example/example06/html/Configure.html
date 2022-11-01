@@ -15,6 +15,10 @@
             function checkForm() {
                 var parameterA = document.getElementById('parameterA');
                 var parameterB = document.getElementById('parameterB');
+
+                /* encode parameters */
+                parameterA.value = encodeURI(parameterA.value);
+                parameterB.value = encodeURI(parameterB.value);
                 if( (parameterA.value.length < 1) ||  (parameterB.value.length < 1) )
                 {
                     console.log("Error parameters");
@@ -25,7 +29,6 @@
                 {
                     return true;
                 }
-                
             }
             window.onload = function()
             { 
