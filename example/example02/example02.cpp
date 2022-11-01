@@ -49,7 +49,7 @@ void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, 
     std::cout << std::endl;
 
     /* http request parameters */
-    req.querys(inList);
+    req.queries(inList);
     for(auto iter = inList.begin(); iter != inList.end(); ++iter)
     {
         std::cout << iter->key << ":" << iter->value << std::endl;
