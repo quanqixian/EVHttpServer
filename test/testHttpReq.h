@@ -61,7 +61,7 @@ TEST(testHttpReq, testHttpReq)
             EXPECT_EQ(req.findQuery("NoExist", value), false);
 
             std::list<EVHttpServer::HttpKeyVal> queryList;
-            req.querys(queryList);
+            req.queries(queryList);
             EXPECT_EQ(queryList.size(), 2);
 
             matchCount = 0;
@@ -126,7 +126,7 @@ TEST(testHttpReq, testHttpReq)
             EXPECT_EQ(req.findQuery("NoExist", value), false);
 
             std::list<EVHttpServer::HttpKeyVal> queryList;
-            req.querys(queryList);
+            req.queries(queryList);
             EXPECT_EQ(queryList.size(), 2);
 
             matchCount = 0;
@@ -188,7 +188,7 @@ TEST(testHttpReq, testHttpReq)
             EXPECT_EQ(req.findQuery("NoExist", value), false);
 
             std::list<EVHttpServer::HttpKeyVal> queryList;
-            req.querys(queryList);
+            req.queries(queryList);
             EXPECT_EQ(queryList.size(), 2);
 
             matchCount = 0;
@@ -252,7 +252,7 @@ TEST(testHttpReq, testHttpReq)
             EXPECT_EQ(req.findQuery("NoExist", value), false);
 
             std::list<EVHttpServer::HttpKeyVal> queryList;
-            req.querys(queryList);
+            req.queries(queryList);
             EXPECT_EQ(queryList.size(), 2);
 
             matchCount = 0;
@@ -716,6 +716,65 @@ TEST(testHttpReq, testDecodeUri)
     {
         flag = false;
         std::string cmd = R"(curl -i "http://0.0.0.0:7777/api/fun?name=%E4%BD%A0%E5%A5%BD" -d "{\"name\":\"tom\"}" -X POST)";
+        system(cmd.c_str());
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        EXPECT_EQ(flag, true);
+    }
+}
+
+/**
+ * @brief test decode queries
+ */
+TEST(testHttpReq, testDecodequeries)
+{
+    volatile bool flag = false;
+
+    class Handle
+    {
+    public:
+        static void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+        {
+            bool * pFlag = static_cast<bool *>(arg);
+
+            std::list<EVHttpServer::HttpKeyVal> queryList;
+            req.queries(queryList);
+            EXPECT_EQ(queryList.size(), 2);
+
+            int matchCount = 0;
+            for(auto iter = queryList.begin(); iter != queryList.end(); ++iter)
+            {
+                if(iter->key == "name")
+                {
+                    EXPECT_EQ(iter->value, "小狗");
+                    matchCount++;
+                }
+                if(iter->key == "age")
+                {
+                    EXPECT_EQ(iter->value, "八岁");
+                    matchCount++;
+                }
+            }
+            EXPECT_EQ(matchCount, 2);
+
+            std::string value;
+            EXPECT_EQ(req.findQuery("name", value), true);
+            EXPECT_EQ(value, "小狗");
+            EXPECT_EQ(req.findQuery("age", value), true);
+            EXPECT_EQ(value, "八岁");
+
+            *pFlag = true;
+        }
+    };
+
+    EVHttpServer server;
+    EXPECT_EQ(server.init(7777), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, Handle::handleFunc, (void *)&flag), true);
+    ASSERT_EQ(server.start(5), true);
+
+    {
+        flag = false;
+        /* http://0.0.0.0:7777/api/fun?name=小狗&age=八岁 */
+        std::string cmd = R"(curl -i "http://0.0.0.0:7777/api/fun?name=%E5%B0%8F%E7%8B%97&age=%E5%85%AB%E5%B2%81" -d "{\"name\":\"tom\"}" -X POST)";
         system(cmd.c_str());
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
         EXPECT_EQ(flag, true);

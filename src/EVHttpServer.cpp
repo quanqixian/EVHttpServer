@@ -779,21 +779,21 @@ bool EVHttpServer::HttpReq::findHeader(const std::string & key, std::string & va
 }
 
 /**
- * @brief      Get querys in http request
- * @param[out] ret : A list for storing http request querys
+ * @brief      Get queries in http request, if queries are encoded, they will be automatically decoded
+ * @param[out] ret : A list for storing http request queries
  * @return     void
  */
-void EVHttpServer::HttpReq::querys(std::list<HttpKeyVal> & ret) const
+void EVHttpServer::HttpReq::queries(std::list<HttpKeyVal> & ret) const
 {
     ret.clear();
 
     const char * uri = evhttp_request_get_uri(m_request);
     struct evhttp_uri * evhttpUri = evhttp_uri_parse(uri);
-    const char * querys = evhttp_uri_get_query(evhttpUri);
-    if(querys)
+    const char * queries = evhttp_uri_get_query(evhttpUri);
+    if(queries)
     {
         struct evkeyvalq headers = {0};
-        if(0 == evhttp_parse_query_str(querys, &headers))
+        if(0 == evhttp_parse_query_str(queries, &headers))
         {
             for(struct evkeyval * h = headers.tqh_first; h; h = h->next.tqe_next)
             {
@@ -811,7 +811,7 @@ void EVHttpServer::HttpReq::querys(std::list<HttpKeyVal> & ret) const
 }
 
 /**
- * @brief      find http query 
+ * @brief      find http query, if queries are encoded, they will be automatically decoded
  * @param[in]  key : query name
  * @param[out] value : query value
  * @retval     true : find success
@@ -821,12 +821,12 @@ bool EVHttpServer::HttpReq::findQuery(const std::string & key, std::string & val
 {
     const char * uri = evhttp_request_get_uri(m_request);
     struct evhttp_uri * evhttpUri = evhttp_uri_parse(uri);
-    const char * querys = evhttp_uri_get_query(evhttpUri);
+    const char * queries = evhttp_uri_get_query(evhttpUri);
     const char * pVal = nullptr;
-    if(querys)
+    if(queries)
     {
         struct evkeyvalq headers = {0};
-        if(0 == evhttp_parse_query_str(querys, &headers))
+        if(0 == evhttp_parse_query_str(queries, &headers))
         {
             pVal = evhttp_find_header(&headers, key.c_str());
             if(pVal)

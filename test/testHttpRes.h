@@ -63,7 +63,7 @@ TEST(testHttpRes, testHttpRes)
             EXPECT_EQ(req.findQuery("NoExist", value), false);
 
             std::list<EVHttpServer::HttpKeyVal> queryList;
-            req.querys(queryList);
+            req.queries(queryList);
             EXPECT_EQ(queryList.size(), 2);
 
             matchCount = 0;
@@ -131,7 +131,7 @@ TEST(testHttpRes, testHttpRes)
             EXPECT_EQ(req.findQuery("NoExist", value), false);
 
             std::list<EVHttpServer::HttpKeyVal> queryList;
-            req.querys(queryList);
+            req.queries(queryList);
             EXPECT_EQ(queryList.size(), 2);
 
             matchCount = 0;
@@ -194,7 +194,7 @@ TEST(testHttpRes, testHttpRes)
             EXPECT_EQ(req.findQuery("NoExist", value), false);
 
             std::list<EVHttpServer::HttpKeyVal> queryList;
-            req.querys(queryList);
+            req.queries(queryList);
             EXPECT_EQ(queryList.size(), 2);
 
             matchCount = 0;
@@ -260,7 +260,7 @@ TEST(testHttpRes, testHttpRes)
             EXPECT_EQ(req.findQuery("NoExist", value), false);
 
             std::list<EVHttpServer::HttpKeyVal> queryList;
-            req.querys(queryList);
+            req.queries(queryList);
             EXPECT_EQ(queryList.size(), 2);
 
             matchCount = 0;
