@@ -680,9 +680,13 @@ std::string EVHttpServer::HttpReq::uri(bool decode) const
     else
     {
         char * decodedUri = evhttp_uridecode(uri, 1, nullptr);
-        std::string ret = (decodedUri != nullptr) ? decodedUri : "";
-        free(decodedUri);
-        return ret;
+        if(decodedUri)
+        {
+            std::string ret = decodedUri;
+            free(decodedUri);
+            return ret;
+        }
+        return "";
     }
 }
 
@@ -844,6 +848,26 @@ bool EVHttpServer::HttpReq::findQuery(const std::string & key, std::string & val
     }
 
     return (pVal != nullptr);
+}
+
+/**
+ * @brief      Helper function to decode a URI-escaped string or HTTP parameter.
+ * @param[in]  in  : string to be decoded
+ * @param[out] out : decoded string
+ * @retval     true : success
+ * @retval     false : failed
+ */
+bool EVHttpServer::HttpReq::decode(const std::string & in, std::string & out)
+{
+    char * decodedUri = evhttp_uridecode(in.c_str(), 1, nullptr);
+    bool ret = (decodedUri != nullptr);
+    if(ret)
+    {
+        out = decodedUri;
+        free(decodedUri);
+        decodedUri = nullptr;
+    }
+    return ret;
 }
 
 /**

@@ -105,6 +105,7 @@ public:
 
         void queries(std::list<HttpKeyVal> & ret) const;
         bool findQuery(const std::string & key, std::string & value) const;
+        static bool decode(const std::string & in, std::string & out);
     private:
         HttpReq(const HttpReq &) = delete;
         HttpReq & operator = (const HttpReq &) = delete;

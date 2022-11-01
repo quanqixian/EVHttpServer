@@ -781,4 +781,19 @@ TEST(testHttpReq, testDecodequeries)
     }
 }
 
+/**
+ * @brief test decode static function
+ */
+TEST(testHttpReq, testDecodeStaticFunction)
+{
+    std::string out;
+    std::string in = "/api/fun%E6%B5%8B%E8%AF%95";
+    EXPECT_EQ(EVHttpServer::HttpReq::decode(in, out), true);
+    EXPECT_EQ(out, "/api/fun测试");
+
+    in = "name=%E5%B0%8F%E7%8B%97&age=%E5%85%AB%E5%B2%81";
+    EXPECT_EQ(EVHttpServer::HttpReq::decode(in, out), true);
+    EXPECT_EQ(out, "name=小狗&age=八岁");
+}
+
 #endif
