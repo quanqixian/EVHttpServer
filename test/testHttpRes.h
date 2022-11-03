@@ -8,6 +8,16 @@
 #include <stdio.h>
 #include <thread>
 #include <cstring>
+#include <condition_variable>
+
+namespace TestHttpRes
+{
+
+volatile bool flag = false;
+std::mutex mtx;
+std::unique_lock<std::mutex> locker(mtx);
+std::condition_variable conditionVal;
+
 
 /**
  * @brief test class HttpRes
@@ -19,7 +29,6 @@ TEST(testHttpRes, testHttpRes)
     public:
         static void postHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHttpServer::REQ_POST);
             EXPECT_EQ(req.methodStr(), "POST");
 
@@ -83,11 +92,12 @@ TEST(testHttpRes, testHttpRes)
             EXPECT_EQ(res.setBody("hello"), true);
             /* not allow setBody more than once */
             EXPECT_EQ(res.setBody("world"), false);
-            *pFlag = true;
+
+            flag = true;
+            conditionVal.notify_one();
         }
         static void putHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHttpServer::REQ_PUT);
             EXPECT_EQ(req.methodStr(), "PUT");
 
@@ -149,11 +159,12 @@ TEST(testHttpRes, testHttpRes)
             EXPECT_EQ(matchCount, 2);
 
             res.addHeader({"favouriteFood", "Udon"});
-            *pFlag = true;
+
+            flag = true;
+            conditionVal.notify_one();
         }
         static void getHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHttpServer::REQ_GET);
             EXPECT_EQ(req.methodStr(), "GET");
 
@@ -212,11 +223,12 @@ TEST(testHttpRes, testHttpRes)
             EXPECT_EQ(matchCount, 2);
             res.setCode(503);
             res.setReason("TheReasonIsServiceUnavailable");
-            *pFlag = true;
+
+            flag = true;
+            conditionVal.notify_one();
         }
         static void deleteHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHttpServer::REQ_DELETE);
             EXPECT_EQ(req.methodStr(), "DELETE");
 
@@ -277,17 +289,17 @@ TEST(testHttpRes, testHttpRes)
             }
             EXPECT_EQ(matchCount, 2);
 
-            *pFlag = true;
+            flag = true;
+            conditionVal.notify_one();
         }
     };
 
-    volatile bool flag = false;
     EVHttpServer server;
     EXPECT_EQ(server.init(9999, "0.0.0.0"), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/postHandle"}, Handle::postHandle, (void *)&flag), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_PUT, "/api/putHandle"}, Handle::putHandle, (void *)&flag), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_GET, "/api/getHandle"}, Handle::getHandle, (void *)&flag), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_DELETE, "/api/deleteHandle"}, Handle::deleteHandle, (void *)&flag), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/postHandle"}, Handle::postHandle), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_PUT, "/api/putHandle"}, Handle::putHandle), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_GET, "/api/getHandle"}, Handle::getHandle), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_DELETE, "/api/deleteHandle"}, Handle::deleteHandle), true);
     EXPECT_EQ(server.start(5), true);
 
     flag = false;
@@ -301,7 +313,7 @@ TEST(testHttpRes, testHttpRes)
     fread(buf, 1, sizeof(buf) - 1, pFile);
     pclose(pFile);
     pFile = nullptr;
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
     EXPECT_EQ(flag, true);
     EXPECT_EQ(std::string(buf), "hello");
 
@@ -316,7 +328,7 @@ TEST(testHttpRes, testHttpRes)
     fread(buf, 1, sizeof(buf) - 1, pFile);
     pclose(pFile);
     pFile = nullptr;
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
     EXPECT_EQ(flag, true);
     EXPECT_NE(strstr(buf, "favouriteFood"), nullptr);
     EXPECT_NE(strstr(buf, "Udon"), nullptr);
@@ -333,7 +345,7 @@ TEST(testHttpRes, testHttpRes)
     fread(buf, 1, sizeof(buf) - 1, pFile);
     pclose(pFile);
     pFile = nullptr;
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
     EXPECT_EQ(flag, true);
     EXPECT_NE(strstr(buf, "http_code:503"), nullptr);
     EXPECT_NE(strstr(buf, "TheReasonIsServiceUnavailable"), nullptr);
@@ -344,7 +356,7 @@ TEST(testHttpRes, testHttpRes)
                 -H "Server: Apache" \
                 -d "{\"name\":\"tom\"}" -X DELETE)";
     system(cmdDelete.c_str());
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
     EXPECT_EQ(flag, true);
 
     /*
@@ -362,7 +374,7 @@ TEST(testHttpRes, testHttpRes)
     fread(buf, 1, sizeof(buf) - 1, pFile);
     pclose(pFile);
     pFile = nullptr;
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
     EXPECT_EQ(flag, false);
     EXPECT_NE(strstr(buf, "http_code:404"), nullptr);
 }
@@ -377,19 +389,19 @@ TEST(testHttpRes, addHeaders)
     public:
         static void putHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             std::list<EVHttpServer::HttpKeyVal> list;
             list.push_back({"favouriteFood", "Udon"});
             list.push_back({"Specialty", "Drawing"});
             res.addHeaders(list);
-            *pFlag = true;
+
+            flag = true;
+            conditionVal.notify_one();
         }
     };
 
-    volatile bool flag = false;
     EVHttpServer server;
     EXPECT_EQ(server.init(9999, "0.0.0.0"), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_PUT, "/api/putHandle"}, Handle::putHandle, (void *)&flag), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_PUT, "/api/putHandle"}, Handle::putHandle), true);
     EXPECT_EQ(server.start(5), true);
 
     flag = false;
@@ -401,7 +413,7 @@ TEST(testHttpRes, addHeaders)
     fread(buf, 1, sizeof(buf) - 1, pFile);
     pclose(pFile);
     pFile = nullptr;
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
     EXPECT_EQ(flag, true);
     EXPECT_NE(strstr(buf, "favouriteFood"), nullptr);
     EXPECT_NE(strstr(buf, "Udon"), nullptr);
@@ -419,19 +431,19 @@ TEST(testHttpRes, setHeaders)
     public:
         static void putHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             std::list<EVHttpServer::HttpKeyVal> list;
             list.push_back({"favouriteFood", "Udon"});
             list.push_back({"Specialty", "Drawing"});
             res.setHeaders(list);
-            *pFlag = true;
+
+            flag = true;
+            conditionVal.notify_one();
         }
     };
 
-    volatile bool flag = false;
     EVHttpServer server;
     EXPECT_EQ(server.init(9999, "0.0.0.0"), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_PUT, "/api/putHandle"}, Handle::putHandle, (void *)&flag), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_PUT, "/api/putHandle"}, Handle::putHandle), true);
     EXPECT_EQ(server.start(5), true);
 
     flag = false;
@@ -443,11 +455,13 @@ TEST(testHttpRes, setHeaders)
     fread(buf, 1, sizeof(buf) - 1, pFile);
     pclose(pFile);
     pFile = nullptr;
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
     EXPECT_EQ(flag, true);
     EXPECT_NE(strstr(buf, "favouriteFood"), nullptr);
     EXPECT_NE(strstr(buf, "Udon"), nullptr);
     EXPECT_NE(strstr(buf, "Specialty"), nullptr);
     EXPECT_NE(strstr(buf, "Drawing"), nullptr);
+}
+
 }
 #endif

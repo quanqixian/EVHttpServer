@@ -6,6 +6,17 @@
 #include <string>
 #include <stdlib.h>
 #include <thread>
+#include <chrono>
+#include <mutex>
+#include <condition_variable>
+
+namespace TestRegexMatch
+{
+
+volatile bool flag = false;
+std::mutex mtx;
+std::unique_lock<std::mutex> locker(mtx);
+std::condition_variable conditionVal;
 
 /**
  * @brief test class HttpReq
@@ -17,7 +28,6 @@ TEST(testRegexMatch, testRegexMatch)
     public:
         static void postHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHttpServer::REQ_POST);
             EXPECT_EQ(req.methodStr(), "POST");
 
@@ -78,11 +88,11 @@ TEST(testRegexMatch, testRegexMatch)
             }
             EXPECT_EQ(matchCount, 2);
 
-            *pFlag = true;
+            flag = true;
+            conditionVal.notify_one();
         }
         static void putHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHttpServer::REQ_PUT);
             EXPECT_EQ(req.methodStr(), "PUT");
 
@@ -143,11 +153,11 @@ TEST(testRegexMatch, testRegexMatch)
             }
             EXPECT_EQ(matchCount, 2);
 
-            *pFlag = true;
+            flag = true;
+            conditionVal.notify_one();
         }
         static void getHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHttpServer::REQ_GET);
             EXPECT_EQ(req.methodStr(), "GET");
 
@@ -204,11 +214,11 @@ TEST(testRegexMatch, testRegexMatch)
                 }
             }
             EXPECT_EQ(matchCount, 2);
-            *pFlag = true;
+            flag = true;
+            conditionVal.notify_one();
         }
         static void deleteHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHttpServer::REQ_DELETE);
             EXPECT_EQ(req.methodStr(), "DELETE");
 
@@ -269,17 +279,17 @@ TEST(testRegexMatch, testRegexMatch)
             }
             EXPECT_EQ(matchCount, 2);
 
-            *pFlag = true;
+            flag = true;
+            conditionVal.notify_one();
         }
     };
 
-    volatile bool flag = false;
     EVHttpServer server;
     EXPECT_EQ(server.init(9999, "0.0.0.0"), true);
-    EXPECT_EQ(server.addRegHandler({EVHttpServer::REQ_POST, "/api/postHandle[1-9]+"}, Handle::postHandle, (void *)&flag), true);
-    EXPECT_EQ(server.addRegHandler({EVHttpServer::REQ_PUT, "/api/putHandle[1-9]+_[1-9]+"}, Handle::putHandle, (void *)&flag), true);
-    EXPECT_EQ(server.addRegHandler({EVHttpServer::REQ_GET, "/api/getHandle[1-9]x$"}, Handle::getHandle, (void *)&flag), true);
-    EXPECT_EQ(server.addRegHandler({EVHttpServer::REQ_DELETE, "/api/deleteHandle[A-z]+"}, Handle::deleteHandle, (void *)&flag), true);
+    EXPECT_EQ(server.addRegHandler({EVHttpServer::REQ_POST, "/api/postHandle[1-9]+"}, Handle::postHandle), true);
+    EXPECT_EQ(server.addRegHandler({EVHttpServer::REQ_PUT, "/api/putHandle[1-9]+_[1-9]+"}, Handle::putHandle), true);
+    EXPECT_EQ(server.addRegHandler({EVHttpServer::REQ_GET, "/api/getHandle[1-9]x$"}, Handle::getHandle), true);
+    EXPECT_EQ(server.addRegHandler({EVHttpServer::REQ_DELETE, "/api/deleteHandle[A-z]+"}, Handle::deleteHandle), true);
     EXPECT_EQ(server.start(5), true);
 
     flag = false;
@@ -288,7 +298,7 @@ TEST(testRegexMatch, testRegexMatch)
                 -H "Server: Apache" \
                 -d "{\"name\":\"tom\"}" -X POST)";
     system(cmdPost.c_str());
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
     EXPECT_EQ(flag, true);
 
     flag = false;
@@ -297,7 +307,7 @@ TEST(testRegexMatch, testRegexMatch)
                 -H "Server: Apache" \
                 -d "{\"name\":\"tom\"}" -X PUT)";
     system(cmdPut.c_str());
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
     EXPECT_EQ(flag, true);
     
     flag = false;
@@ -306,7 +316,7 @@ TEST(testRegexMatch, testRegexMatch)
                 -H "Server: Apache" \
                 -X GET)";
     system(cmdGet.c_str());
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
     EXPECT_EQ(flag, true);
 
     flag = false;
@@ -315,7 +325,7 @@ TEST(testRegexMatch, testRegexMatch)
                 -H "Server: Apache" \
                 -d "{\"name\":\"tom\"}" -X DELETE)";
     system(cmdDelete.c_str());
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
     EXPECT_EQ(flag, true);
 }
 
@@ -338,4 +348,5 @@ TEST(testRegexMatch, testErrorRegex)
     EXPECT_EQ(server.addRegHandler({EVHttpServer::REQ_POST, "/api/fun]}{["}, Handle::handleFunc, nullptr), false);
 }
 
+}
 #endif

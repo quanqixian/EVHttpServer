@@ -6,6 +6,15 @@
 #include <string>
 #include <stdlib.h>
 #include <thread>
+#include <condition_variable>
+
+namespace TestHttpReq
+{
+
+volatile bool flag = false;
+std::mutex mtx;
+std::unique_lock<std::mutex> locker(mtx);
+std::condition_variable conditionVal;
 
 /**
  * @brief test class HttpReq
@@ -17,7 +26,6 @@ TEST(testHttpReq, testHttpReq)
     public:
         static void postHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHttpServer::REQ_POST);
             EXPECT_EQ(req.methodStr(), "POST");
 
@@ -78,11 +86,11 @@ TEST(testHttpReq, testHttpReq)
             }
             EXPECT_EQ(matchCount, 2);
 
-            *pFlag = true;
+            flag = true;
+            conditionVal.notify_one();
         }
         static void putHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHttpServer::REQ_PUT);
             EXPECT_EQ(req.methodStr(), "PUT");
 
@@ -143,11 +151,11 @@ TEST(testHttpReq, testHttpReq)
             }
             EXPECT_EQ(matchCount, 2);
 
-            *pFlag = true;
+            flag = true;
+            conditionVal.notify_one();
         }
         static void getHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHttpServer::REQ_GET);
             EXPECT_EQ(req.methodStr(), "GET");
 
@@ -204,11 +212,12 @@ TEST(testHttpReq, testHttpReq)
                 }
             }
             EXPECT_EQ(matchCount, 2);
-            *pFlag = true;
+
+            flag = true;
+            conditionVal.notify_one();
         }
         static void deleteHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHttpServer::REQ_DELETE);
             EXPECT_EQ(req.methodStr(), "DELETE");
 
@@ -269,17 +278,17 @@ TEST(testHttpReq, testHttpReq)
             }
             EXPECT_EQ(matchCount, 2);
 
-            *pFlag = true;
+            flag = true;
+            conditionVal.notify_one();
         }
     };
 
-    volatile bool flag = false;
     EVHttpServer server;
     EXPECT_EQ(server.init(9999, "0.0.0.0"), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/postHandle"}, Handle::postHandle, (void *)&flag), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_PUT, "/api/putHandle"}, Handle::putHandle, (void *)&flag), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_GET, "/api/getHandle"}, Handle::getHandle, (void *)&flag), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_DELETE, "/api/deleteHandle"}, Handle::deleteHandle, (void *)&flag), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/postHandle"}, Handle::postHandle), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_PUT, "/api/putHandle"}, Handle::putHandle), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_GET, "/api/getHandle"}, Handle::getHandle), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_DELETE, "/api/deleteHandle"}, Handle::deleteHandle), true);
     ASSERT_EQ(server.start(5), true);
 
     flag = false;
@@ -288,7 +297,7 @@ TEST(testHttpReq, testHttpReq)
                 -H "Server: Apache" \
                 -d "{\"name\":\"tom\"}" -X POST)";
     system(cmdPost.c_str());
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
     EXPECT_EQ(flag, true);
 
     flag = false;
@@ -297,7 +306,7 @@ TEST(testHttpReq, testHttpReq)
                 -H "Server: Apache" \
                 -d "{\"name\":\"tom\"}" -X PUT)";
     system(cmdPut.c_str());
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
     EXPECT_EQ(flag, true);
     
     flag = false;
@@ -306,7 +315,7 @@ TEST(testHttpReq, testHttpReq)
                 -H "Server: Apache" \
                 -X GET)";
     system(cmdGet.c_str());
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
     EXPECT_EQ(flag, true);
 
     flag = false;
@@ -315,13 +324,13 @@ TEST(testHttpReq, testHttpReq)
                 -H "Server: Apache" \
                 -d "{\"name\":\"tom\"}" -X DELETE)";
     system(cmdDelete.c_str());
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
     EXPECT_EQ(flag, true);
 
     flag = false;
     std::string cmdNoExist = R"(curl -i "http://0.0.0.0:9999/api/noExist" -X POST)";
     system(cmdNoExist.c_str());
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
     EXPECT_EQ(flag, false);
 }
 
@@ -330,16 +339,15 @@ TEST(testHttpReq, testHttpReq)
  */
 TEST(testHttpReq, testBigBody)
 {
-    volatile bool flag = false;
-
     class Handle
     {
     public:
         static void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_GT(req.body().size(), 1024);
-            *pFlag = true;
+
+            flag = true;
+            conditionVal.notify_one();
         }
     };
 
@@ -351,7 +359,7 @@ TEST(testHttpReq, testBigBody)
     flag = false;
     std::string cmdPost = R"(curl "http://0.0.0.0:9999/api/fun" -d @./testHttpReq.h  -X POST)";
     system(cmdPost.c_str());
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
     EXPECT_EQ(flag, true);
 }
 
@@ -366,139 +374,138 @@ TEST(testHttpReq, methodStr)
     public:
         static void postHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHttpServer::REQ_POST);
             EXPECT_EQ(req.methodStr(), "POST");
-            *pFlag = true;
+            flag = true;
+            conditionVal.notify_one();
         }
         static void putHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHttpServer::REQ_PUT);
             EXPECT_EQ(req.methodStr(), "PUT");
-            *pFlag = true;
+            flag = true;
+            conditionVal.notify_one();
         }
         static void getHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHttpServer::REQ_GET);
             EXPECT_EQ(req.methodStr(), "GET");
-            *pFlag = true;
+            flag = true;
+            conditionVal.notify_one();
         }
         static void deleteHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHttpServer::REQ_DELETE);
             EXPECT_EQ(req.methodStr(), "DELETE");
-            *pFlag = true;
+            flag = true;
+            conditionVal.notify_one();
         }
         static void headHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHttpServer::REQ_HEAD);
             EXPECT_EQ(req.methodStr(), "HEAD");
-            *pFlag = true;
+            flag = true;
+            conditionVal.notify_one();
         }
         static void traceHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHttpServer::REQ_TRACE);
             EXPECT_EQ(req.methodStr(), "TRACE");
-            *pFlag = true;
+            flag = true;
+            conditionVal.notify_one();
         }
         static void connectHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHttpServer::REQ_CONNECT);
             EXPECT_EQ(req.methodStr(), "CONNECT");
-            *pFlag = true;
+            flag = true;
+            conditionVal.notify_one();
         }
         static void patchHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHttpServer::REQ_PATCH);
             EXPECT_EQ(req.methodStr(), "PATCH");
-            *pFlag = true;
+            flag = true;
+            conditionVal.notify_one();
         }
         static void optionsHandle(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.method(), EVHttpServer::REQ_OPTIONS);
             EXPECT_EQ(req.methodStr(), "OPTIONS");
-            *pFlag = true;
+            flag = true;
+            conditionVal.notify_one();
         }
     };
 
-    volatile bool flag = false;
     EVHttpServer server;
     EXPECT_EQ(server.init(9999, "0.0.0.0"), true);
 
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/postHandle"}, Handle::postHandle, (void *)&flag), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_PUT, "/api/putHandle"}, Handle::putHandle, (void *)&flag), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_GET, "/api/getHandle"}, Handle::getHandle, (void *)&flag), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_DELETE, "/api/deleteHandle"}, Handle::deleteHandle, (void *)&flag), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/postHandle"}, Handle::postHandle), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_PUT, "/api/putHandle"}, Handle::putHandle), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_GET, "/api/getHandle"}, Handle::getHandle), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_DELETE, "/api/deleteHandle"}, Handle::deleteHandle), true);
 
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_OPTIONS, "/api/optionsHandle"}, Handle::optionsHandle, (void *)&flag), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_TRACE, "/api/traceHandle"}, Handle::traceHandle, (void *)&flag), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_CONNECT, "/api/connectHandle"}, Handle::connectHandle, (void *)&flag), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_HEAD, "/api/headHandle"}, Handle::headHandle, (void *)&flag), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_PATCH, "/api/patchHandle"}, Handle::patchHandle, (void *)&flag), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_OPTIONS, "/api/optionsHandle"}, Handle::optionsHandle), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_TRACE, "/api/traceHandle"}, Handle::traceHandle), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_CONNECT, "/api/connectHandle"}, Handle::connectHandle), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_HEAD, "/api/headHandle"}, Handle::headHandle), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_PATCH, "/api/patchHandle"}, Handle::patchHandle), true);
     ASSERT_EQ(server.start(5), true);
 
     {
         flag = false;
         std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/postHandle" -X POST )";
         system(cmd.c_str());
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
         EXPECT_EQ(flag, true);
     }
     {
         flag = false;
         std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/putHandle" -X PUT )";
         system(cmd.c_str());
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
         EXPECT_EQ(flag, true);
     }
     {
         flag = false;
         std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/getHandle" -X GET )";
         system(cmd.c_str());
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
         EXPECT_EQ(flag, true);
     }
     {
         flag = false;
         std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/deleteHandle" -X DELETE )";
         system(cmd.c_str());
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
         EXPECT_EQ(flag, true);
     }
     {
         flag = false;
         std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/traceHandle" -X TRACE )";
         system(cmd.c_str());
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
         EXPECT_EQ(flag, true);
     }
     {
         flag = false;
         std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/patchHandle" -X PATCH )";
         system(cmd.c_str());
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
         EXPECT_EQ(flag, true);
     }
     {
         flag = false;
         std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/headHandle" -X HEAD --head )";
         system(cmd.c_str());
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
         EXPECT_EQ(flag, true);
     }
     {
         flag = false;
         std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/optionsHandle" -X OPTIONS )";
         system(cmd.c_str());
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
         EXPECT_EQ(flag, true);
     }
 }
@@ -508,36 +515,34 @@ TEST(testHttpReq, methodStr)
  */
 TEST(testHttpReq, testNoThreadPool)
 {
-    volatile bool flag = false;
-
     class Handle
     {
     public:
         static void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
-            *pFlag = true;
+            flag = true;
+            conditionVal.notify_one();
         }
     };
 
     EVHttpServer server;
     EXPECT_EQ(server.init(9999, "0.0.0.0"), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, Handle::handleFunc, (void *)&flag), true);
-    EXPECT_EQ(server.addRegHandler({EVHttpServer::REQ_POST, "/api/fun[1-9]+"}, Handle::handleFunc, (void *)&flag), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, Handle::handleFunc), true);
+    EXPECT_EQ(server.addRegHandler({EVHttpServer::REQ_POST, "/api/fun[1-9]+"}, Handle::handleFunc), true);
     ASSERT_EQ(server.start(0), true);
 
     {
         flag = false;
         std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/fun" -X POST )";
         system(cmd.c_str());
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
         EXPECT_EQ(flag, true);
     }
     {
         flag = false;
         std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/fun100" -X POST )";
         system(cmd.c_str());
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
         EXPECT_EQ(flag, true);
     }
 }
@@ -547,42 +552,40 @@ TEST(testHttpReq, testNoThreadPool)
  */
 TEST(testHttpReq, testMultilePorts)
 {
-    volatile bool flag = false;
-
     class Handle
     {
     public:
         static void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
-            *pFlag = true;
+            flag = true;
+            conditionVal.notify_one();
         }
     };
 
     EVHttpServer server;
     EXPECT_EQ(server.init({7777, 8888, 9999}, "0.0.0.0"), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, Handle::handleFunc, (void *)&flag), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, Handle::handleFunc), true);
     ASSERT_EQ(server.start(0), true);
 
     {
         flag = false;
         std::string cmd = R"(curl -i "http://0.0.0.0:7777/api/fun" -X POST )";
         system(cmd.c_str());
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
         EXPECT_EQ(flag, true);
     }
     {
         flag = false;
         std::string cmd = R"(curl -i "http://0.0.0.0:8888/api/fun" -X POST )";
         system(cmd.c_str());
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
         EXPECT_EQ(flag, true);
     }
     {
         flag = false;
         std::string cmd = R"(curl -i "http://0.0.0.0:9999/api/fun" -X POST )";
         system(cmd.c_str());
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
         EXPECT_EQ(flag, true);
     }
 }
@@ -592,29 +595,28 @@ TEST(testHttpReq, testMultilePorts)
  */
 TEST(testHttpReq, testGetRequestHost)
 {
-    volatile bool flag = false;
-
     class Handle
     {
     public:
         static void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.host(), "0.0.0.0");
-            *pFlag = true;
+
+            flag = true;
+            conditionVal.notify_one();
         }
     };
 
     EVHttpServer server;
     EXPECT_EQ(server.init(7777), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, Handle::handleFunc, (void *)&flag), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, Handle::handleFunc), true);
     ASSERT_EQ(server.start(5), true);
 
     {
         flag = false;
         std::string cmd = R"(curl -i "http://0.0.0.0:7777/api/fun" -X POST )";
         system(cmd.c_str());
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
         EXPECT_EQ(flag, true);
     }
 }
@@ -624,29 +626,28 @@ TEST(testHttpReq, testGetRequestHost)
  */
 TEST(testHttpReq, testGetRequestUri)
 {
-    volatile bool flag = false;
-
     class Handle
     {
     public:
         static void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             EXPECT_EQ(req.uri(), "/api/fun?name=Tom");
-            *pFlag = true;
+
+            flag = true;
+            conditionVal.notify_one();
         }
     };
 
     EVHttpServer server;
     EXPECT_EQ(server.init(7777), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, Handle::handleFunc, (void *)&flag), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, Handle::handleFunc), true);
     ASSERT_EQ(server.start(5), true);
 
     {
         flag = false;
         std::string cmd = R"(curl -i "http://0.0.0.0:7777/api/fun?name=Tom" -X POST )";
         system(cmd.c_str());
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
         EXPECT_EQ(flag, true);
     }
 }
@@ -656,31 +657,30 @@ TEST(testHttpReq, testGetRequestUri)
  */
 TEST(testHttpReq, testbodyRaw)
 {
-    volatile bool flag = false;
-
     class Handle
     {
     public:
         static void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             std::string body = R"({"name":"tom"})";
             std::unique_ptr<char[]> ptr = req.bodyRaw();
             EXPECT_EQ(body, ptr.get());
-            *pFlag = true;
+
+            flag = true;
+            conditionVal.notify_one();
         }
     };
 
     EVHttpServer server;
     EXPECT_EQ(server.init(7777), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, Handle::handleFunc, (void *)&flag), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, Handle::handleFunc), true);
     ASSERT_EQ(server.start(5), true);
 
     {
         flag = false;
         std::string cmd = R"(curl -i "http://0.0.0.0:7777/api/fun?name=Tom" -d "{\"name\":\"tom\"}" -X POST)";
         system(cmd.c_str());
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
         EXPECT_EQ(flag, true);
     }
 
@@ -691,33 +691,32 @@ TEST(testHttpReq, testbodyRaw)
  */
 TEST(testHttpReq, testDecodeUri)
 {
-    volatile bool flag = false;
-
     class Handle
     {
     public:
         static void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
             std::string urlExpect = R"(/api/fun?name=你好)";
             std::string url = req.uri();
             std::string urlDecode = req.uri(true);
             EXPECT_NE(urlExpect, url);
             EXPECT_EQ(urlExpect, urlDecode);
-            *pFlag = true;
+
+            flag = true;
+            conditionVal.notify_one();
         }
     };
 
     EVHttpServer server;
     EXPECT_EQ(server.init(7777), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, Handle::handleFunc, (void *)&flag), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, Handle::handleFunc), true);
     ASSERT_EQ(server.start(5), true);
 
     {
         flag = false;
         std::string cmd = R"(curl -i "http://0.0.0.0:7777/api/fun?name=%E4%BD%A0%E5%A5%BD" -d "{\"name\":\"tom\"}" -X POST)";
         system(cmd.c_str());
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
         EXPECT_EQ(flag, true);
     }
 }
@@ -727,15 +726,11 @@ TEST(testHttpReq, testDecodeUri)
  */
 TEST(testHttpReq, testDecodequeries)
 {
-    volatile bool flag = false;
-
     class Handle
     {
     public:
         static void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
-            bool * pFlag = static_cast<bool *>(arg);
-
             std::list<EVHttpServer::HttpKeyVal> queryList;
             req.queries(queryList);
             EXPECT_EQ(queryList.size(), 2);
@@ -762,13 +757,14 @@ TEST(testHttpReq, testDecodequeries)
             EXPECT_EQ(req.findQuery("age", value), true);
             EXPECT_EQ(value, "八岁");
 
-            *pFlag = true;
+            flag = true;
+            conditionVal.notify_one();
         }
     };
 
     EVHttpServer server;
     EXPECT_EQ(server.init(7777), true);
-    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, Handle::handleFunc, (void *)&flag), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, Handle::handleFunc), true);
     ASSERT_EQ(server.start(5), true);
 
     {
@@ -776,7 +772,7 @@ TEST(testHttpReq, testDecodequeries)
         /* http://0.0.0.0:7777/api/fun?name=小狗&age=八岁 */
         std::string cmd = R"(curl -i "http://0.0.0.0:7777/api/fun?name=%E5%B0%8F%E7%8B%97&age=%E5%85%AB%E5%B2%81" -d "{\"name\":\"tom\"}" -X POST)";
         system(cmd.c_str());
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        conditionVal.wait_for(locker, std::chrono::seconds(1), []{return flag;});
         EXPECT_EQ(flag, true);
     }
 }
@@ -796,4 +792,5 @@ TEST(testHttpReq, testDecodeStaticFunction)
     EXPECT_EQ(out, "name=小狗&age=八岁");
 }
 
+}
 #endif
