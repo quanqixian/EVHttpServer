@@ -731,21 +731,17 @@ std::string EVHttpServer::HttpReq::body() const
 
 /**
  * @brief      Get http request body raw data
- * @return     std::unique_ptr which provides raw data of body
+ * @return     std::vector which provides raw data of body
  */
-std::unique_ptr<char[]> EVHttpServer::HttpReq::bodyRaw() const
+std::vector<char> EVHttpServer::HttpReq::bodyRaw() const
 {
     evbuffer * inputBuf = evhttp_request_get_input_buffer(m_request);
     int bufLen = evbuffer_get_length(inputBuf);
 
-    char * bufIn = new(std::nothrow) char[bufLen + 1];
-    if(nullptr == bufIn)
-    {
-        return nullptr;
-    }
-    evbuffer_copyout(inputBuf, bufIn, bufLen);
-    bufIn[bufLen] = 0;
-    return std::unique_ptr<char[]>(bufIn);
+    std::vector<char> rawBody(bufLen);
+    evbuffer_copyout(inputBuf, &rawBody[0], bufLen);
+
+    return rawBody;
 }
 
 /**

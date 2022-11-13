@@ -663,8 +663,11 @@ TEST(testHttpReq, testbodyRaw)
         static void handleFunc(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
         {
             std::string body = R"({"name":"tom"})";
-            std::unique_ptr<char[]> ptr = req.bodyRaw();
-            EXPECT_EQ(body, ptr.get());
+            std::vector<char> rawBody = req.bodyRaw();
+            EXPECT_EQ(body.size(),rawBody.size());
+
+            std::string raw = std::string(&rawBody[0], rawBody.size());
+            EXPECT_EQ(body, raw);
 
             flag = true;
             conditionVal.notify_one();
