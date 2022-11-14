@@ -187,8 +187,7 @@ private:
         std::size_t operator () (const PathAndMethod & t) const
         {
             std::string key = std::to_string(t.method) + t.path;
-            std::hash<std::string> strHash;
-            return strHash(key);
+            return std::hash<std::string>() (key);
         }
     };
     struct CallBackBind
