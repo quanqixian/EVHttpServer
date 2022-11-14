@@ -469,7 +469,8 @@ void * EVHttpServer::dispatchThread(void * arg)
 }
 
 /**
- * @brief      destructor
+ * @brief      The destructor of EVHttpServer, the stop and deInit functions
+ * will be executed in this function, and other resources will be released.
  */
 EVHttpServer::~EVHttpServer()
 {
