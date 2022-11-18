@@ -543,9 +543,7 @@ bool EVHttpServer::addRegHandler(const PathAndMethod & reqArg, const ReqHandler 
         return false;
     }
 #endif
-
-    RegNode node = {reqArg, reg, {handler, arg}};
-    m_regList.push_back(node);
+    m_regList.push_back(RegNode{reqArg, reg, {handler, arg}});
 
     return true;
 }
