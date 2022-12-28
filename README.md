@@ -4,6 +4,9 @@
 
 # Introduction
 
+[![badge](https://img.shields.io/badge/license-MIT-blue)](https://github.com/quanqixian/EVHttpServer/blob/master/LICENSE)
+[![badge](https://img.shields.io/badge/document-doxygen-brightgreen)](https://quanqixian.github.io/EVHttpServer/)
+
 EVHttpServer is just an http server implemented by encapsulating libevent using c++, It provides:
 
 - Simpler api
