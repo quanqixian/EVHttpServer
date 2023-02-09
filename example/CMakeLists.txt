@@ -27,3 +27,6 @@ foreach(example ${EXAMPLES})
 endforeach()
 
 add_custom_target(examples ALL DEPENDS ${EXAMPLES})
+
+message(NOTICE "Copy the html files used in the example to the build directory...")
+file(COPY ${CMAKE_SOURCE_DIR}/example06/html/ DESTINATION ${PROJECT_BINARY_DIR}/html)

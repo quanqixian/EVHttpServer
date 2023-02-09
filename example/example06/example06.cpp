@@ -82,6 +82,7 @@ std::unique_ptr<char[]> readFile(const std::string & fileName)
     }
     else
     {
+        std::cout << "fail to open file:" << fileName;
         return nullptr;
     }
 }
