@@ -14,19 +14,20 @@ execute_process(
 	RESULT_VARIABLE result
 	)
 if(result)
-	message(WARNING "CMake step [clone] for googletest maybe error: ${result}")
+	message(WARNING "CMake step [clone] for libevent maybe error: ${result}")
 endif()
 
 set(THIRDPARTY_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libevent)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/install)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build)
 
-execute_process(COMMAND ${CMAKE_COMMAND} -B build -S . -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR}/install 
+execute_process(COMMAND ${CMAKE_COMMAND} -B build -S .
+	-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR}/install -DEVENT__DISABLE_OPENSSL=ON
 	RESULT_VARIABLE result
 	WORKING_DIRECTORY ${THIRDPARTY_SOURCE_DIR}
 )
 if(result)
-	message(FATAL_ERROR "CMake step [configure] for googletest failed: ${result}")
+	message(FATAL_ERROR "CMake step [configure] for libevent failed: ${result}")
 endif()
 
 execute_process(COMMAND ${CMAKE_COMMAND} --build build 
@@ -34,7 +35,7 @@ execute_process(COMMAND ${CMAKE_COMMAND} --build build
 	WORKING_DIRECTORY ${THIRDPARTY_SOURCE_DIR}
 )
 if(result)
-	message(FATAL_ERROR "CMake step [build] for googletest failed: ${result}")
+	message(FATAL_ERROR "CMake step [build] for libevent failed: ${result}")
 endif()
 
 execute_process(COMMAND ${CMAKE_COMMAND} --install build 
@@ -42,5 +43,5 @@ execute_process(COMMAND ${CMAKE_COMMAND} --install build
 	WORKING_DIRECTORY ${THIRDPARTY_SOURCE_DIR}
 )
 if(result)
-	message(FATAL_ERROR "CMake step [install] for googletest failed: ${result}")
+	message(FATAL_ERROR "CMake step [install] for libevent failed: ${result}")
 endif()
