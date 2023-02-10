@@ -16,7 +16,7 @@ set(EXAMPLES
     example06
 )
 
-set(EVHTTP_ROOT_DIR ..)
+set(EVHTTP_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 set(LIBEVENT_DIR ${EVHTTP_ROOT_DIR}/thirdparty/libevent/install/)
 
 foreach(example ${EXAMPLES})
@@ -29,4 +29,4 @@ endforeach()
 add_custom_target(examples ALL DEPENDS ${EXAMPLES})
 
 message(NOTICE "Copy the html files used in the example to the build directory...")
-file(COPY ${CMAKE_SOURCE_DIR}/example06/html/ DESTINATION ${PROJECT_BINARY_DIR}/html)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/example06/html/ DESTINATION ${PROJECT_BINARY_DIR}/html)
