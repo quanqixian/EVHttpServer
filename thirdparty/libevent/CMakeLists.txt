@@ -22,7 +22,7 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/install)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build)
 
 execute_process(COMMAND ${CMAKE_COMMAND} -B build -S .
-	-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR}/install -DEVENT__DISABLE_OPENSSL=ON
+	-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR}/install -DEVENT__DISABLE_OPENSSL=ON -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
 	RESULT_VARIABLE result
 	WORKING_DIRECTORY ${THIRDPARTY_SOURCE_DIR}
 )
@@ -30,7 +30,7 @@ if(result)
 	message(FATAL_ERROR "CMake step [configure] for libevent failed: ${result}")
 endif()
 
-execute_process(COMMAND ${CMAKE_COMMAND} --build build 
+execute_process(COMMAND ${CMAKE_COMMAND} --build build --config ${CMAKE_BUILD_TYPE}
 	RESULT_VARIABLE result
 	WORKING_DIRECTORY ${THIRDPARTY_SOURCE_DIR}
 )
@@ -38,7 +38,7 @@ if(result)
 	message(FATAL_ERROR "CMake step [build] for libevent failed: ${result}")
 endif()
 
-execute_process(COMMAND ${CMAKE_COMMAND} --install build 
+execute_process(COMMAND ${CMAKE_COMMAND} --install build --config ${CMAKE_BUILD_TYPE}
 	RESULT_VARIABLE result
 	WORKING_DIRECTORY ${THIRDPARTY_SOURCE_DIR}
 )

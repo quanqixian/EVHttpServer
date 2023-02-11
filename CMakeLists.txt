@@ -6,6 +6,7 @@ project(EVHttpServer VERSION 1.0)
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_BUILD_TYPE Release)
 
 option(WITH_TESTS "Compile and run test executables" ON)
 option(WITH_EXAMPLE "Compile examples" ON)
