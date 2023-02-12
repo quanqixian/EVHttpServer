@@ -2,6 +2,12 @@
 #include <iostream>
 #include <thread>
 #include <signal.h>
+
+#ifdef _WIN32
+    #include <WinSock2.h>
+    #pragma comment(lib, "ws2_32.lib")
+#endif
+
 static volatile bool g_runFlag = true;
 
 void sighandler(int signum)
@@ -20,6 +26,15 @@ void func(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void *
 
 int main(int argc, const char *argv[])
 {
+#ifdef _WIN32
+{
+    WORD wVersionRequested;
+    WSADATA wsaData;
+    wVersionRequested = MAKEWORD(2, 2);
+    WSAStartup(wVersionRequested, &wsaData);
+}
+#endif
+
     EVHttpServer server;
 
     server.addHandler({EVHttpServer::REQ_POST, "/api/fun"}, func);
@@ -34,6 +49,10 @@ int main(int argc, const char *argv[])
     {
         std::this_thread::sleep_for(std::chrono::seconds(2));
     }
+
+#ifdef _WIN32
+    WSACleanup();
+#endif
 
     return 0;
 }

@@ -6,6 +6,11 @@
 #include <fstream>
 #include <cstring>
 
+#ifdef _WIN32
+    #include <WinSock2.h>
+    #pragma comment(lib, "ws2_32.lib")
+#endif
+
 static volatile bool g_runFlag = true;
 static std::string g_parameterA = "test";
 static std::string g_parameterB = "123";
@@ -219,6 +224,15 @@ void saveCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res
 
 int main(int argc, const char *argv[])
 {
+#ifdef _WIN32
+{
+    WORD wVersionRequested;
+    WSADATA wsaData;
+    wVersionRequested = MAKEWORD(2, 2);
+    WSAStartup(wVersionRequested, &wsaData);
+}
+#endif
+
     EVHttpServer server;
 
     server.addHandler({EVHttpServer::REQ_GET, "/"}, loginCallback);
@@ -234,6 +248,10 @@ int main(int argc, const char *argv[])
     {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+
+#ifdef _WIN32
+    WSACleanup();
+#endif
 
     return 0;
 }
