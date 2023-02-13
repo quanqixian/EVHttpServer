@@ -1,4 +1,4 @@
-#ifndef _EVHTTP_SERVER_H_
+﻿#ifndef _EVHTTP_SERVER_H_
 #define _EVHTTP_SERVER_H_
 
 #include <string>
@@ -8,6 +8,12 @@
 #include <list>
 #include <regex>
 #include <vector>
+
+#ifdef _WIN32
+    #define DLL_EXPORT    __declspec( dllexport )
+#else
+    #define DLL_EXPORT
+#endif
 
 /**
  * @def   USE_LINUX_REGEX_API
@@ -54,7 +60,7 @@ struct event_base;
  * - Use thread pool to handle http requests
  * - Support regular matching path
  */
-class EVHttpServer
+class DLL_EXPORT EVHttpServer
 {
 public:
     /**
@@ -77,7 +83,7 @@ public:
      * @brief HttpKeyVal is a key-value pair used to 
      * represent the HTTP head and HTTP Query
      */
-    struct HttpKeyVal
+    struct DLL_EXPORT HttpKeyVal
     {
         std::string key;
         std::string value;
@@ -89,7 +95,7 @@ public:
      *   It is not allowed to be created externally.
      *   Some components of the uri do not provide access functions.
      */
-    class HttpReq
+    class DLL_EXPORT HttpReq
     {
     public:
         ReqType method() const;
@@ -119,7 +125,7 @@ public:
      * provides methods for setting body, head, code, etc.
      * It is not allowed to be created externally.
      */
-    class HttpRes
+    class DLL_EXPORT HttpRes
     {
     public:
         bool setBody(const std::string & body);
@@ -149,7 +155,7 @@ public:
     /**
      * @brief Path and method are used to represent an HTTP request 
      */
-    struct PathAndMethod
+    struct DLL_EXPORT PathAndMethod
     {
     public:
         PathAndMethod() : method(ReqType::REQ_GET)
