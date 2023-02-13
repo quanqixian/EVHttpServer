@@ -1,4 +1,4 @@
-#include "EVHttpServer.h"
+﻿#include "EVHttpServer.h"
 #include <iostream>
 #include <thread>
 #include <signal.h>
@@ -32,7 +32,7 @@ bool getQuery(const char * pStr, const char * key, std::string & value)
 {
     bool ret = true;
 
-    int len = strlen(key);
+    size_t len = strlen(key);
     std::string str = std::string(key) + "="; 
     char * p = strstr((char *)pStr, str.c_str());
     ret = ret && (nullptr != p);

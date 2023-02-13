@@ -14,7 +14,7 @@ execute_process(
 	RESULT_VARIABLE result
 	)
 if(result)
-	message(WARNING "CMake step [clone] for libevent maybe error: ${result}")
+	message(WARNING "CMake step [clone] for libevent, may be an error in cloning the repository, or the code directory has been cloned: ${result}")
 endif()
 
 set(THIRDPARTY_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libevent)

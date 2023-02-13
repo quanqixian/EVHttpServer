@@ -1,4 +1,4 @@
-#include "EVHttpServer.h"
+﻿#include "EVHttpServer.h"
 #include <cstring>
 #include <signal.h>
 #include "event2/http.h"
@@ -697,7 +697,7 @@ std::string EVHttpServer::HttpReq::uri(bool decode) const
 std::string EVHttpServer::HttpReq::body() const
 {
     evbuffer * inputBuf = evhttp_request_get_input_buffer(m_request);
-    int bufLen = evbuffer_get_length(inputBuf);
+    auto bufLen = evbuffer_get_length(inputBuf);
 
     /*
      *   In windows, the compiler requires the size of the array allocated in
@@ -735,7 +735,7 @@ std::string EVHttpServer::HttpReq::body() const
 std::vector<char> EVHttpServer::HttpReq::bodyRaw() const
 {
     evbuffer * inputBuf = evhttp_request_get_input_buffer(m_request);
-    int bufLen = evbuffer_get_length(inputBuf);
+    auto bufLen = evbuffer_get_length(inputBuf);
 
     std::vector<char> rawBody(bufLen);
     evbuffer_copyout(inputBuf, &rawBody[0], bufLen);
