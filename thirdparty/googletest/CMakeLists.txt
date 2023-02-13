@@ -14,13 +14,25 @@ else()
     set(GTEST_BRANCH release-1.10.0)
 endif()
 
-execute_process(
-	COMMAND ${GIT_EXECUTABLE} clone --depth 1 --branch ${GTEST_BRANCH} https://github.com/google/googletest.git ./googletest
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-	RESULT_VARIABLE result
+#If clone is unsuccessful, try again several times
+foreach(count RANGE 1 3)
+	execute_process(
+		COMMAND ${GIT_EXECUTABLE} clone --depth 1 --branch ${GTEST_BRANCH} https://github.com/google/googletest.git ./googletest
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+		RESULT_VARIABLE result
 	)
+	if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/googletest" AND IS_DIRECTORY
+			"${CMAKE_CURRENT_SOURCE_DIR}/googletest")
+		message(STATUS "Clone googletest repository successed...")
+		break()
+	endif()
+	message(WARNING "CMake step [clone] for googletest, may be an error in cloning the repository, try again...")
+endforeach()
+
 if(result)
-	message(WARNING "CMake step [clone] for googletest, may be an error in cloning the repository, or the code directory has been cloned: ${result}")
+	if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/googletest")
+		message(FATAL_ERROR "CMake step [clone] for googletest, may be an error in cloning the repository: ${result}")
+	endif()
 endif()
 
 set(THIRDPARTY_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/googletest)

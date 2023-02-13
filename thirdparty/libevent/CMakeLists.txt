@@ -8,13 +8,24 @@ if (NOT Git_FOUND)
 	message(FATAL_ERROR "Git not found, can't initialize!")
 endif()
 
-execute_process(
-	COMMAND ${GIT_EXECUTABLE} clone --depth 1 --branch release-2.1.12-stable https://github.com/libevent/libevent.git
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-	RESULT_VARIABLE result
+#If clone is unsuccessful, try again several times
+foreach(count RANGE 1 3)
+	execute_process(
+		COMMAND ${GIT_EXECUTABLE} clone --depth 1 --branch release-2.1.12-stable https://github.com/libevent/libevent.git
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+		RESULT_VARIABLE result
 	)
+	if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/libevent" AND IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/libevent")
+		message(STATUS "Clone libevent repository successed...")
+		break()
+	endif()
+	message(WARNING "CMake step [clone] for libevent, may be an error in cloning the repository, try again...")
+endforeach()
+
 if(result)
-	message(WARNING "CMake step [clone] for libevent, may be an error in cloning the repository, or the code directory has been cloned: ${result}")
+	if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/libevent")
+		message(FATAL_ERROR "CMake step [clone] for libevent, may be an error in cloning the repository: ${result}")
+	endif()
 endif()
 
 set(THIRDPARTY_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libevent)
