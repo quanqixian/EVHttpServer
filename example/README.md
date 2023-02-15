@@ -8,4 +8,5 @@
 | [example04](./example04/example04.cpp) | Example of using regex in path           |
 | [example05](./example05/example05.cpp) | Example of using lambda as request callback|
 | [example06](./example06/README.md) | A simple web configure page|
+| [example06](./example07/example07.cpp) | A copy of example01, but when compiling with dynamic library |
 
