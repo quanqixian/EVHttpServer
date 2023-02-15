@@ -15,8 +15,9 @@ EVHttpServer is just an http server implemented by encapsulating libevent using 
 
 - Support regular matching path
 
-
 # Examples 
+
+See examples [here](./example).
 
 Here is a simple example of using EVHttpServer:
 
@@ -59,7 +60,7 @@ int main(int argc, const char *argv[])
 }
 ```
 
-See more examples [here](./example)
+
 
 # API documentation
 
@@ -70,3 +71,35 @@ Click [here](https://quanqixian.github.io/EVHttpServer/) to jump to the api docu
 The first way is to include the source code in the [src](./src) directory into your project, and then give libevent's header file path, library path and rpath when compiling.
 
 The second way is to use EVHttpServer compiled as a library.
+
+# Build
+
+1. Clone the repository
+
+```shell
+git clone https://github.com/quanqixian/EVHttpServer.git
+```
+
+2. Generate the necessary build files
+
+   In this step, the third-party library will be cloned.
+
+```cmake
+cd EVHttpServer
+cmake -B build -S . -DCMAKE_INSTALL_PREFIX=/path/to/install
+```
+
+3. Compile the source code. In this step, third-party libraries, EVHttpServer library, samples, tests will be compiled.
+
+```cmake
+cmake --build build
+```
+
+4. Install to system
+
+```cmake
+cmake --install build
+```
+
+Now you can use the EVHttpServer library, include the header file "EVHttpServer.h" in the code, link the libevent library and the EVHttpServer library when compiling.
+

@@ -19,3 +19,5 @@ else()
 endif()
 
 target_link_directories(example07 PUBLIC ${CMAKE_BINARY_DIR}/src)
+
+install(TARGETS example07)
