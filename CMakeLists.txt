@@ -20,6 +20,12 @@ if(EVHTTPSERVER_WITH_EXAMPLE)
 	add_subdirectory(example)
 endif()
 
+if(EVHTTPSERVER_WITH_TESTS)
+	enable_testing()
+	include(CTest)
+	add_subdirectory(test)
+endif()
+
 if(EVHTTPSERVER_BUILD_DOXYGEN_DOC)
 	find_package(Doxygen)
 	if(DOXYGEN_FOUND)
