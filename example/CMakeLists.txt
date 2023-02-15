@@ -26,7 +26,8 @@ foreach(example ${EXAMPLES})
     else()
         target_link_libraries(${example} event event_pthreads pthread)
     endif()
-	target_link_directories(${example} PUBLIC ${LIBEVENT_DIR}/lib)
+
+	install(TARGETS ${example})
 endforeach()
 
 add_custom_target(examples ALL DEPENDS ${EXAMPLES})
@@ -35,3 +36,4 @@ add_subdirectory(example07)
 
 message(NOTICE "Copy the html files used in the example to the build directory...")
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/example06/html/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/html)
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/example06/html" TYPE BIN)

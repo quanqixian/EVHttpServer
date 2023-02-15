@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 add_custom_target(doxygenDoc ALL
-	COMMAND doxygen ./Doxyfile
+	COMMAND doxygen ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	COMMENT "\nGenerate API documentation using doxygen begin..."
 	)
@@ -19,3 +19,7 @@ add_custom_command(TARGET doxygenDoc
 	COMMENT "Generate API documentation using doxygen finished..."
 	VERBATIM
 )
+
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/docs" AND IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/docs")
+	install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/docs/" TYPE DOC)
+endif()
