@@ -29,39 +29,6 @@ if(result)
 endif()
 
 set(THIRDPARTY_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libevent)
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/install)
+set(EVENT__DISABLE_OPENSSL ON CACHE BOOL "Enalbe DISABLE_OPENSSL")
+add_subdirectory(${THIRDPARTY_SOURCE_DIR})
 
-if(NOT ${CMAKE_GENERATOR_PLATFORM} STREQUAL "")
-	execute_process(COMMAND ${CMAKE_COMMAND} -B build -S .
-		-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR}/install
-		-DEVENT__DISABLE_OPENSSL=ON -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -A
-		${CMAKE_GENERATOR_PLATFORM}
-		RESULT_VARIABLE result
-		WORKING_DIRECTORY ${THIRDPARTY_SOURCE_DIR}
-		)
-else()
-	execute_process(COMMAND ${CMAKE_COMMAND} -B build -S .
-		-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR}/install -DEVENT__DISABLE_OPENSSL=ON -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-		RESULT_VARIABLE result
-		WORKING_DIRECTORY ${THIRDPARTY_SOURCE_DIR}
-		)
-endif()
-if(result)
-	message(FATAL_ERROR "CMake step [configure] for libevent failed: ${result}")
-endif()
-
-execute_process(COMMAND ${CMAKE_COMMAND} --build build --config ${CMAKE_BUILD_TYPE}
-	RESULT_VARIABLE result
-	WORKING_DIRECTORY ${THIRDPARTY_SOURCE_DIR}
-)
-if(result)
-	message(FATAL_ERROR "CMake step [build] for libevent failed: ${result}")
-endif()
-
-execute_process(COMMAND ${CMAKE_COMMAND} --install build --config ${CMAKE_BUILD_TYPE}
-	RESULT_VARIABLE result
-	WORKING_DIRECTORY ${THIRDPARTY_SOURCE_DIR}
-)
-if(result)
-	message(FATAL_ERROR "CMake step [install] for libevent failed: ${result}")
-endif()

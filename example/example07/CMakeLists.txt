@@ -8,7 +8,6 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(EVHTTP_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../)
-set(LIBEVENT_DIR ${EVHTTP_ROOT_DIR}/thirdparty/libevent/install/)
 
 add_executable(example07 example07.cpp)
 target_include_directories(example07 PUBLIC ${EVHTTP_ROOT_DIR}/src)
