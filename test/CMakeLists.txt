@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(EVHTTP_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../)
 
-add_executable(unitTest  unitTest.cpp ${EVHTTP_ROOT_DIR}/src/EVHttpServer.cpp) 
+add_executable(unitTest  unitTest.cpp) 
 target_include_directories(unitTest PUBLIC ${EVHTTP_ROOT_DIR}/src)
 
 if (WIN32)
@@ -17,7 +17,5 @@ if (WIN32)
 else()
     target_link_libraries(unitTest event event_pthreads pthread EVHttpServer gtest)
 endif()
-
-target_link_directories(unitTest PUBLIC ${CMAKE_BINARY_DIR}/src)
 
 add_test(NAME unitTest COMMAND unitTest)

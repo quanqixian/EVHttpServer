@@ -12,16 +12,16 @@ set(EVHTTPSERVER_SOURCES
 )
 
 if(EVHTTPSERVER_BUILD_SHARED_LIBS)
-	add_library(EVHttpServer_shared SHARED ${EVHTTPSERVER_SOURCES})
-	set_target_properties(EVHttpServer_shared PROPERTIES OUTPUT_NAME EVHttpServer)
+	add_library(EVHttpServer SHARED ${EVHTTPSERVER_SOURCES})
+	set_target_properties(EVHttpServer PROPERTIES OUTPUT_NAME EVHttpServer)
 
     if (WIN32)
-        target_link_libraries(EVHttpServer_shared event event_core)
+        target_link_libraries(EVHttpServer event event_core)
     else()
-        target_link_libraries(EVHttpServer_shared event event_pthreads pthread)
+        target_link_libraries(EVHttpServer event event_pthreads pthread)
     endif()
 
-	install(TARGETS EVHttpServer_shared)
+	install(TARGETS EVHttpServer)
 endif()
 
 if(EVHTTPSERVER_BUILD_STATIC_LIBS)
