@@ -5,6 +5,6 @@ project(thirdparty VERSION 1.0)
 
 add_subdirectory(libevent)
 
-if(WITH_TESTS)
+if(EVHTTPSERVER_WITH_TESTS)
 	add_subdirectory(googletest)
 endif()
