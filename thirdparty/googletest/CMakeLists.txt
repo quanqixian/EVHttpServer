@@ -37,4 +37,5 @@ endif()
 
 set(THIRDPARTY_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/googletest)
 
+set(INSTALL_GTEST OFF CACHE BOOL "Disable install googletest")
 add_subdirectory(${THIRDPARTY_SOURCE_DIR})
