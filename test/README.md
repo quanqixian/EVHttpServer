@@ -33,7 +33,9 @@ cmake --build build
 
 4. Run tests and generate code coverage reports. 
 
+```cmake
     cmake --build build -t coverage
+```
 
 5. Install . 
 
