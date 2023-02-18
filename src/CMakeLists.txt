@@ -21,6 +21,14 @@ if(EVHTTPSERVER_BUILD_SHARED_LIBS)
         target_link_libraries(EVHttpServer event event_pthreads pthread)
     endif()
 
+	if ((CMAKE_BUILD_TYPE STREQUAL Debug) AND UNIX)
+		target_compile_options(EVHttpServer PRIVATE --coverage)
+		target_link_options(EVHttpServer PUBLIC --coverage)
+		add_custom_command(TARGET EVHttpServer PRE_BUILD 
+			COMMAND find ${CMAKE_BINARY_DIR} -type f -name '*.gcda' -exec rm {} +
+			)
+	endif()
+
 	install(TARGETS EVHttpServer)
 endif()
 
@@ -36,6 +44,14 @@ if(EVHTTPSERVER_BUILD_STATIC_LIBS)
         set_target_properties(EVHttpServer_static PROPERTIES OUTPUT_NAME EVHttpServer)
         target_link_libraries(EVHttpServer_static event event_pthreads pthread)
     endif()
+
+	if ((CMAKE_BUILD_TYPE STREQUAL Debug) AND UNIX)
+		target_compile_options(EVHttpServer_static PRIVATE --coverage)
+		target_link_options(EVHttpServer_static PUBLIC --coverage)
+		add_custom_command(TARGET EVHttpServer_static PRE_BUILD 
+			COMMAND find ${CMAKE_BINARY_DIR} -type f -name '*.gcda' -exec rm {} +
+			)
+	endif()
 
 	install(TARGETS EVHttpServer_static)
 endif()
