@@ -43,5 +43,5 @@ cmake --build build
 cmake --install build
 ```
 
-Now you can view the report in `${DCMAKE_INSTALL_PREFIX}/doc/coverage` directory.
+Now you can view the report in `doc/coverage` directory.
 
