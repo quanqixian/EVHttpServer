@@ -11,6 +11,12 @@ set(EVHTTPSERVER_SOURCES
 	EVHttpServer.cpp
 )
 
+#   If the EVHTTPSVR_EXPORT_SYMBOL macro is defined, EVHTTPSVR_DLL_DECLARE will be
+# defined as __declspec( dllexport ), which is used to export symbols when
+#  compiling the EVHttpServer library.
+#
+add_definitions(-DEVHTTPSVR_EXPORT_SYMBOL)
+
 if(EVHTTPSERVER_BUILD_SHARED_LIBS)
 	add_library(EVHttpServer SHARED ${EVHTTPSERVER_SOURCES})
 	set_target_properties(EVHttpServer PROPERTIES OUTPUT_NAME EVHttpServer)

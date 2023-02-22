@@ -10,9 +10,13 @@
 #include <vector>
 
 #ifdef _WIN32
-    #define DLL_EXPORT    __declspec( dllexport )
+    #ifdef EVHTTPSVR_EXPORT_SYMBOL
+        #define EVHTTPSVR_DLL_DECLARE    __declspec( dllexport )
+    #else
+        #define EVHTTPSVR_DLL_DECLARE    __declspec( dllimport )
+    #endif
 #else
-    #define DLL_EXPORT
+    #define EVHTTPSVR_DLL_DECLARE
 #endif
 
 /**
@@ -60,7 +64,7 @@ struct event_base;
  * - Use thread pool to handle http requests
  * - Support regular matching path
  */
-class DLL_EXPORT EVHttpServer
+class EVHTTPSVR_DLL_DECLARE EVHttpServer
 {
 public:
     /**
@@ -83,7 +87,7 @@ public:
      * @brief HttpKeyVal is a key-value pair used to 
      * represent the HTTP head and HTTP Query
      */
-    struct DLL_EXPORT HttpKeyVal
+    struct EVHTTPSVR_DLL_DECLARE HttpKeyVal
     {
         std::string key;
         std::string value;
@@ -95,7 +99,7 @@ public:
      *   It is not allowed to be created externally.
      *   Some components of the uri do not provide access functions.
      */
-    class DLL_EXPORT HttpReq
+    class EVHTTPSVR_DLL_DECLARE HttpReq
     {
     public:
         ReqType method() const;
@@ -125,7 +129,7 @@ public:
      * provides methods for setting body, head, code, etc.
      * It is not allowed to be created externally.
      */
-    class DLL_EXPORT HttpRes
+    class EVHTTPSVR_DLL_DECLARE HttpRes
     {
     public:
         bool setBody(const std::string & body);
@@ -155,7 +159,7 @@ public:
     /**
      * @brief Path and method are used to represent an HTTP request 
      */
-    struct DLL_EXPORT PathAndMethod
+    struct EVHTTPSVR_DLL_DECLARE PathAndMethod
     {
     public:
         PathAndMethod() : method(ReqType::REQ_GET)
