@@ -10,7 +10,11 @@
 #include <vector>
 
 #ifdef _WIN32
-    #ifdef EVHTTPSVR_EXPORT_SYMBOL
+    /*
+     * The EVHTTPSVR_EXPORT_SYMBOL macro is defined in the Cmake file that
+     * compiles the EVHttpServer library 
+     */
+    #ifdef EVHTTPSVR_EXPORT_SYMBOL 
         #define EVHTTPSVR_DLL_DECLARE    __declspec( dllexport )
     #else
         #define EVHTTPSVR_DLL_DECLARE    __declspec( dllimport )
