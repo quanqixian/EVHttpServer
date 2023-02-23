@@ -86,7 +86,7 @@ git clone https://github.com/quanqixian/EVHttpServer.git
 
 ```cmake
 cd EVHttpServer
-cmake -B build -S . -DCMAKE_INSTALL_PREFIX=/path/to/install
+cmake -B build -S . -DCMAKE_INSTALL_PREFIX=/path/to/install -DCMAKE_BUILD_TYPE=Release
 ```
 
 3. Compile the source code. In this step, third-party libraries, EVHttpServer library, samples, tests will be compiled.
