@@ -17,7 +17,7 @@
     #ifdef EVHTTPSVR_EXPORT_SYMBOL 
         #define EVHTTPSVR_DLL_DECLARE    __declspec( dllexport )
     #else
-        #define EVHTTPSVR_DLL_DECLARE    __declspec( dllimport )
+        #define EVHTTPSVR_DLL_DECLARE    // __declspec( dllimport )  //In order to use both source code and library at the same time, dllimport is not used
     #endif
 #else
     #define EVHTTPSVR_DLL_DECLARE

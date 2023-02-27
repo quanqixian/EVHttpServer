@@ -7,7 +7,11 @@ project(EVHttpServer VERSION 1.0)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-option(EVHTTPSERVER_WITH_TESTS "Compile and run test executables" ON)
+
+if(NOT WIN32)
+    option(EVHTTPSERVER_WITH_TESTS "Compile and run test executables" ON)
+endif()
+
 option(EVHTTPSERVER_WITH_EXAMPLE "Compile examples" ON)
 option(EVHTTPSERVER_BUILD_SHARED_LIBS "Build lib as a shared library." ON)
 option(EVHTTPSERVER_BUILD_STATIC_LIBS "Build lib as a static library." ON)

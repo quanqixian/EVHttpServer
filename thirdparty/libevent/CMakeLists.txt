@@ -28,7 +28,10 @@ if(result)
 	endif()
 endif()
 
+find_package(OpenSSL)
+if (NOT OPENSSL_FOUND)
+	set(EVENT__DISABLE_OPENSSL ON CACHE BOOL "Enalbe DISABLE_OPENSSL")
+endif()
 set(THIRDPARTY_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libevent)
-set(EVENT__DISABLE_OPENSSL ON CACHE BOOL "Enalbe DISABLE_OPENSSL")
 add_subdirectory(${THIRDPARTY_SOURCE_DIR})
 

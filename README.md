@@ -4,6 +4,7 @@
 
 # Introduction
 
+[![build and test](https://github.com/quanqixian/EVHttpServer/actions/workflows/build-test.yml/badge.svg?branch=master)](https://github.com/quanqixian/EVHttpServer/actions/workflows/build-test.yml)
 [![badge](https://img.shields.io/badge/license-MIT-blue)](https://github.com/quanqixian/EVHttpServer/blob/master/LICENSE)
 [![badge](https://img.shields.io/badge/document-doxygen-brightgreen)](https://quanqixian.github.io/EVHttpServer/)
 
