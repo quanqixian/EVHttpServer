@@ -20,6 +20,7 @@ add_definitions(-DEVHTTPSVR_EXPORT_SYMBOL)
 if(EVHTTPSERVER_BUILD_SHARED_LIBS)
 	add_library(EVHttpServer SHARED ${EVHTTPSERVER_SOURCES})
 	set_target_properties(EVHttpServer PROPERTIES OUTPUT_NAME EVHttpServer)
+	set_target_properties(EVHttpServer PROPERTIES INSTALL_RPATH "$ORIGIN")
 
     if (WIN32)
         target_link_libraries(EVHttpServer event event_core)
