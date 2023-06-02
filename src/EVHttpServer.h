@@ -8,6 +8,7 @@
 #include <list>
 #include <regex>
 #include <vector>
+#include <functional>
 
 #ifdef _WIN32
     /*
@@ -158,7 +159,7 @@ public:
         friend EVHttpServer;
     };
 
-    using ReqHandler = void (*)(const HttpReq & req, HttpRes & res, void * arg);/* Define http request callback function type */
+    using ReqHandler = std::function<void (const HttpReq & req, HttpRes & res, void * arg) >;/* Define http request callback function type */
 public:
     /**
      * @brief Path and method are used to represent an HTTP request 
