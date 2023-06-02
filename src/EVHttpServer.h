@@ -194,7 +194,7 @@ public:
 private:
     bool deInit();
     static void handleHttpEvent(struct evhttp_request * request, void * arg);
-    static void * dispatchThread(void * arg);
+    void dispatchThread();
 private:
     struct PathAndMethodHash
     {

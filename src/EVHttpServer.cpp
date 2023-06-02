@@ -226,7 +226,7 @@ bool EVHttpServer::start(const unsigned int threadNum)
         /* Create dispatch thread */
         m_isRunning = true;
 
-        m_thread = new(std::nothrow) std::thread(dispatchThread, this);
+        m_thread = new(std::nothrow) std::thread(&EVHttpServer::dispatchThread, this);
         if(nullptr == m_thread)
         {
             m_isRunning = false;
@@ -453,19 +453,14 @@ bool EVHttpServer::stop()
 
 /**
  * @brief      Event dispatch thread function
- * @param[in]  arg : User-defined parameters, "this" pointer is passed in here
  * @return     void
  */
-void * EVHttpServer::dispatchThread(void * arg)
+void EVHttpServer::dispatchThread()
 {
-    EVHttpServer * pThis = static_cast<EVHttpServer *>(arg);
-
-    if(pThis->m_base)
+    if(m_base)
     {
-        event_base_dispatch(pThis->m_base);
+        event_base_dispatch(m_base);
     }
-
-    return nullptr;
 }
 
 /**
