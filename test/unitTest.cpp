@@ -2,6 +2,7 @@
 #include "testHttpReq.h"
 #include "testHttpRes.h"
 #include "testRegexMatch.h"
+#include "testLambda.h"
 
 int main(int argc, char **argv)
 {
