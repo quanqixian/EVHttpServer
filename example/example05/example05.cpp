@@ -2,6 +2,7 @@
 #include <iostream>
 #include <thread>
 #include <signal.h>
+#include <condition_variable>
 
 #ifdef _WIN32
     #include <WinSock2.h>
@@ -15,17 +16,35 @@ void sighandler(int signum)
     g_runFlag = false;
 }
 
-int main(int argc, const char *argv[])
+void lambdaTest01()
 {
-#ifdef _WIN32
-{
-    WORD wVersionRequested;
-    WSADATA wsaData;
-    wVersionRequested = MAKEWORD(2, 2);
-    WSAStartup(wVersionRequested, &wsaData);
-}
-#endif
+    volatile bool flag = false;
+    std::mutex mtx;
+    std::unique_lock<std::mutex> locker(mtx);
+    std::condition_variable conditionVal;
 
+    EVHttpServer server;
+    server.init(9999, "0.0.0.0");
+    server.addHandler({EVHttpServer::REQ_PUT, "/api/fun"},  [&](const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)->void {
+        flag = true;
+        conditionVal.notify_one();
+    });
+    server.start(5);
+
+    conditionVal.wait_for(locker, std::chrono::seconds(10), [&]{return flag;});
+
+    if(flag)
+    {
+        std::cout << "Recv" << std::endl;
+    }
+    else
+    {
+        std::cout << "No recv." << std::endl;
+    }
+}
+
+void lambdaTest02()
+{
     EVHttpServer server;
     server.init(9999);
     server.start();
@@ -43,6 +62,21 @@ int main(int argc, const char *argv[])
     {
         std::this_thread::sleep_for(std::chrono::seconds(2));
     }
+}
+
+int main(int argc, const char *argv[])
+{
+#ifdef _WIN32
+{
+    WORD wVersionRequested;
+    WSADATA wsaData;
+    wVersionRequested = MAKEWORD(2, 2);
+    WSAStartup(wVersionRequested, &wsaData);
+}
+#endif
+
+    lambdaTest01();
+    lambdaTest02();
 
 #ifdef _WIN32
     WSACleanup();
