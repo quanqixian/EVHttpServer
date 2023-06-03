@@ -138,6 +138,7 @@ public:
     {
     public:
         bool setBody(const std::string & body);
+        bool setBody(const std::vector<char> & body);
         bool addHeader(const HttpKeyVal & header);
         bool addHeaders(const std::list<HttpKeyVal> & list);
         bool setHeaders(const std::list<HttpKeyVal> & list);

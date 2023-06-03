@@ -871,7 +871,7 @@ EVHttpServer::HttpRes::HttpRes(evhttp_request * req) : m_request(req)
 
 /**
  * @brief      set http response body
- * @param[in]  body : response body
+ * @param[in]  body : response body (std::string)
  * @retval     true : set success
  * @retval     false : set failed
  */
@@ -884,6 +884,29 @@ bool EVHttpServer::HttpRes::setBody(const std::string & body)
 
     evbuffer * outputBuf = evhttp_request_get_output_buffer(m_request);
     bool ret = (0 == evbuffer_add(outputBuf, body.c_str(), body.size()));
+    if(ret)
+    {
+        m_initBody = true;
+    }
+
+    return ret;
+}
+
+/**
+ * @brief      set http response body
+ * @param[in]  body : response body (std::vector)
+ * @retval     true : set success
+ * @retval     false : set failed
+ */
+bool EVHttpServer::HttpRes::setBody(const std::vector<char> & body)
+{
+    if(m_initBody)
+    {
+        return false;
+    }
+
+    evbuffer * outputBuf = evhttp_request_get_output_buffer(m_request);
+    bool ret = (0 == evbuffer_add(outputBuf, &body[0], body.size()));
     if(ret)
     {
         m_initBody = true;

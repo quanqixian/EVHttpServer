@@ -463,5 +463,47 @@ TEST(testHttpRes, setHeaders)
     EXPECT_NE(strstr(buf, "Drawing"), nullptr);
 }
 
+/**
+ * @brief test setBody use vector 
+ */
+TEST(testHttpRes, setBody_vector)
+{
+    volatile bool m_flag = false;
+    std::mutex m_mtx;
+    std::unique_lock<std::mutex> m_locker(m_mtx);
+    std::condition_variable m_conditionVal;
+
+    EVHttpServer server;
+    EXPECT_EQ(server.init(9999, "0.0.0.0"), true);
+    EXPECT_EQ(server.addHandler({EVHttpServer::REQ_POST, "/api/postHandle"}, [&](const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)->void {
+
+        std::string str = "hello";
+        std::vector<char> body(str.begin(), str.end());
+
+        EXPECT_EQ(res.setBody(body), true);
+        /* not allow setBody more than once */
+        EXPECT_EQ(res.setBody(body), false);
+
+        m_flag = true;
+        m_conditionVal.notify_one();
+    }), true);
+
+    EXPECT_EQ(server.start(5), true);
+
+    std::string cmdPost = R"(curl "http://0.0.0.0:9999/api/postHandle?system=ubuntu&test=passed"  \
+                -H "Content-Type: application/json" \
+                -H "Server: Apache" \
+                -d "{\"name\":\"tom\"}" -X POST)";
+    FILE * pFile = popen(cmdPost.c_str(), "r");
+    ASSERT_NE(pFile, nullptr);
+    char buf[256] = {0};
+    fread(buf, 1, sizeof(buf) - 1, pFile);
+    pclose(pFile);
+    pFile = nullptr;
+    conditionVal.wait_for(locker, std::chrono::seconds(1), [&]{return m_flag;});
+    EXPECT_EQ(m_flag, true);
+    EXPECT_EQ(std::string(buf), "hello");
+}
+
 }
 #endif
