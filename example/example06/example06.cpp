@@ -66,11 +66,12 @@ bool getQuery(const char * pStr, const char * key, std::string & value)
 }
 
 /**
- * @brief      Read file to buffer
+ * @brief      Read file to vector
  * @param[in]  fileName : name of file
- * @return     a smart pointer to buffer
+ * @param[out] body : file content
+ * @return     vector for storing file content
  */
-std::unique_ptr<char[]> readFile(const std::string & fileName)
+bool readFile(const std::string & fileName, std::vector<char> & body)
 {
     std::ifstream ifStm (fileName, std::ifstream::binary);
     if(ifStm.is_open())
@@ -79,16 +80,15 @@ std::unique_ptr<char[]> readFile(const std::string & fileName)
         std::size_t size = pBuf->pubseekoff(0, ifStm.end, ifStm.in);
         pBuf->pubseekpos(0, ifStm.in);
 
-        std::unique_ptr<char[]> buffer(new char[size + 1]);
-        buffer[size] = 0;
-        pBuf->sgetn(buffer.get(),size);
+        body.resize(size);
+        pBuf->sgetn(&body[0],size);
         ifStm.close();
-        return buffer;
+        return true;
     }
     else
     {
         std::cout << "fail to open file:" << fileName;
-        return nullptr;
+        return false;
     }
 }
 
@@ -101,11 +101,12 @@ std::unique_ptr<char[]> readFile(const std::string & fileName)
  */
 void loginCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
 {
-    std::unique_ptr<char[]> buffer = readFile("./html/Login.html");
-    if(nullptr != buffer.get())
+    std::vector<char> body;
+    bool ret = readFile("./html/Login.html", body);
+    if(ret)
     {
         res.addHeader({"Content-Type", "text/html;charset:utf-8;"});
-        res.setBody(buffer.get());
+        res.setBody(body);
     }
     else
     {
@@ -147,10 +148,11 @@ void checkLoginCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes
     ret = ret && (password == "123456");
     if(ret)
     {
-        std::unique_ptr<char[]> buffer = readFile("./html/Configure.html");
-        if(nullptr != buffer.get())
+        std::vector<char> body;
+        bool ret = readFile("./html/Configure.html", body);
+        if(ret)
         {
-            res.setBody(buffer.get());
+            res.setBody(body);
         }
         else
         {
@@ -159,10 +161,11 @@ void checkLoginCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes
     }
     else
     {
-        std::unique_ptr<char[]> buffer = readFile("./html/ReLogin.html");
-        if(nullptr != buffer.get())
+        std::vector<char> body;
+        bool ret = readFile("./html/ReLogin.html", body);
+        if(ret)
         {
-            res.setBody(buffer.get());
+            res.setBody(body);
         }
         else
         {
@@ -198,10 +201,11 @@ void saveCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res
     {
         g_parameterA = parameterA;
         g_parameterB = parameterB;
-        std::unique_ptr<char[]> buffer = readFile("./html/Success.html");
-        if(nullptr != buffer.get())
+        std::vector<char> body;
+        bool ret = readFile("./html/Success.html", body);
+        if(ret)
         {
-            res.setBody(buffer.get());
+            res.setBody(body);
         }
         else
         {
@@ -210,10 +214,11 @@ void saveCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res
     }
     else
     {
-        std::unique_ptr<char[]> buffer = readFile("./html/Fail.html");
-        if(nullptr != buffer.get())
+        std::vector<char> body;
+        bool ret = readFile("./html/Fail.html", body);
+        if(ret)
         {
-            res.setBody(buffer.get());
+            res.setBody(body);
         }
         else
         {
