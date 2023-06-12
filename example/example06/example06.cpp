@@ -92,6 +92,76 @@ bool readFile(const std::string & fileName, std::vector<char> & body)
     }
 }
 
+/* Try to guess a good content-type for filePath */
+static const char * getContentType(const std::string & filePath)
+{
+    struct TableEntry 
+    {
+        const char *extension;
+        const char *content_type;
+    };
+    static const TableEntry content_type_table[] = {
+        { "txt", "text/plain" },
+        { "c", "text/plain" },
+        { "h", "text/plain" },
+        { "html", "text/html" },
+        { "htm", "text/htm" },
+        { "css", "text/css" },
+        { "gif", "image/gif" },
+        { "jpg", "image/jpeg" },
+        { "jpeg", "image/jpeg" },
+        { "png", "image/png" },
+        { "pdf", "application/pdf" },
+        { "ps", "application/postscript" },
+        { NULL, NULL },
+    };
+    std::size_t found = filePath.find_last_of('.');
+    if(std::string::npos == found)
+    {
+        goto NOT_FOUND; /* no exension */
+    }
+
+    {
+        std::string fileExtension = filePath.substr(found+1);
+        for (auto ent = &content_type_table[0]; ent->extension; ++ent)
+        {
+            if(fileExtension == ent->extension)
+            {
+                return ent->content_type;
+            }
+        }
+    }
+
+NOT_FOUND:
+    return "application/misc";
+}
+
+/**
+ * @brief      static page handler
+ * @param[in]  req : http request
+ * @param[out] res : http response
+ * @param[in]  arg : User-defined parameters
+ * @return     void
+ */
+void staticFileCallBack(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+{
+    std::string path = req.path();
+    std::string filePath= "." + path;
+
+    std::vector<char> body;
+    bool ret = readFile(filePath, body);
+    if(ret)
+    {
+        std::string contentType = getContentType(filePath);
+        res.addHeader({"Content-Type", contentType});
+        res.setBody(body);
+    }
+    else
+    {
+        res.setCode(404);
+    }
+}
+
 /**
  * @brief      Login callback handler
  * @param[in]  req : http request
@@ -99,7 +169,7 @@ bool readFile(const std::string & fileName, std::vector<char> & body)
  * @param[in]  arg : User-defined parameters
  * @return     void
  */
-void loginCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
+void rootCallback(const EVHttpServer::HttpReq & req, EVHttpServer::HttpRes & res, void * arg)
 {
     std::vector<char> body;
     bool ret = readFile("./html/Login.html", body);
@@ -240,10 +310,15 @@ int main(int argc, const char *argv[])
 
     EVHttpServer server;
 
-    server.addHandler({EVHttpServer::REQ_GET, "/"}, loginCallback);
+    /* static page or files */
+    server.addHandler({EVHttpServer::REQ_GET, "/"}, rootCallback);
+    server.addRegHandler({EVHttpServer::REQ_GET, "/html/*"}, staticFileCallBack);
+
+    /* dynamic page */
     server.addHandler({EVHttpServer::REQ_GET, "/getParameters"}, getParametersCallback);
     server.addHandler({EVHttpServer::REQ_POST, "/checkLogin"}, checkLoginCallback);
     server.addHandler({EVHttpServer::REQ_POST, "/save"}, saveCallback);
+
     server.init(8080);
     server.start();
 
