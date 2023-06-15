@@ -101,18 +101,35 @@ static const char * getContentType(const std::string & filePath)
         const char *content_type;
     };
     static const TableEntry content_type_table[] = {
-        { "txt", "text/plain" },
-        { "c", "text/plain" },
-        { "h", "text/plain" },
-        { "html", "text/html" },
-        { "htm", "text/htm" },
-        { "css", "text/css" },
-        { "gif", "image/gif" },
+        /* Image Type */
         { "jpg", "image/jpeg" },
         { "jpeg", "image/jpeg" },
         { "png", "image/png" },
+        { "gif", "image/gif" },
+
+        /* Text Type */
+        { "html", "text/html" },
+        { "htm", "text/htm" },
+        { "css", "text/css" },
+        { "txt", "text/plain" },
+        { "c", "text/plain" },
+        { "h", "text/plain" },
+
+        /* Audio Type */
+        { "wav", "audio/wav" },
+        { "mp3", "audio/mp3" },
+
+        /* Video Type */
+        { "avi", "video/avi" },
+        { "mp4", "video/mpeg4" },
+        { "mpeg", "video/mpg" },
+        { "wmv", "video/x-ms-wmv" },
+
+        /* Application Type */
         { "pdf", "application/pdf" },
+        { "zip", "application/zip" },
         { "ps", "application/postscript" },
+
         { NULL, NULL },
     };
     std::size_t found = filePath.find_last_of('.');
