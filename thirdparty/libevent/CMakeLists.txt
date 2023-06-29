@@ -11,7 +11,7 @@ endif()
 #If clone is unsuccessful, try again several times
 foreach(count RANGE 1 3)
 	execute_process(
-		COMMAND ${GIT_EXECUTABLE} clone --depth 1 --branch release-2.1.12-stable https://github.com/libevent/libevent.git
+		COMMAND ${GIT_EXECUTABLE} clone --depth 1 --branch release-2.2.1-alpha https://github.com/libevent/libevent.git
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		RESULT_VARIABLE result
 	)
@@ -32,6 +32,7 @@ find_package(OpenSSL)
 if (NOT OPENSSL_FOUND)
 	set(EVENT__DISABLE_OPENSSL ON CACHE BOOL "Enalbe DISABLE_OPENSSL")
 endif()
+set(EVENT__DISABLE_MBEDTLS ON CACHE BOOL "Enalbe DISABLE_MBEDTLS")
 set(THIRDPARTY_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libevent)
 add_subdirectory(${THIRDPARTY_SOURCE_DIR})
 

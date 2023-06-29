@@ -34,6 +34,7 @@ endforeach()
 add_custom_target(examples ALL DEPENDS ${EXAMPLES})
 
 add_subdirectory(example07)
+add_subdirectory(example08)
 
 message(NOTICE "Copy the html files used in the example to the build directory...")
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/example06/html/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/html)

@@ -2,12 +2,14 @@
 #include <cstring>
 #include <signal.h>
 #include "event2/http.h"
+#include "event2/ws.h"
 #include "event2/thread.h"
 #include "event2/http_struct.h"
 #include "event2/event.h"
 #include "event2/listener.h"
 #include "event2/keyvalq_struct.h"
 #include "event2/buffer.h"
+#include "event2/bufferevent.h"
 #include "ThreadPool.h"
 
 #define EVLOG_FATAL(errnum, fmt, ...) printf("[F] %s:%d [%s] errnum=%d " fmt "\n", __FILE__, __LINE__, __FUNCTION__, errnum, ##__VA_ARGS__)
@@ -290,6 +292,113 @@ bool EVHttpServer::addHandler(const PathAndMethod & reqArg, const ReqHandler & h
 }
 
 /**
+ * @brief      websocket on message private callback.
+ * @param[in]  evws : websocket connect context.
+ * @param[in]  type : msg type, TEXT_FRAME(0x1) or BINARY_FRAME(0x2)
+ * @param[in]  data : message buffer pointer
+ * @param[in]  len : message buffer length
+ * @param[in]  arg : A parameter of WSSession pointer type will be passed in.
+ * @return     void
+ */
+void EVHttpServer::onWebSocketMsgCallback(struct evws_connection *evws, int type, const unsigned char *data, size_t len, void *arg)
+{
+    WSSession * pSession = static_cast<WSSession*>(arg);
+    WSCallBackBind *handleBind = static_cast<WSCallBackBind*>(pSession->m_arg);
+
+    if(handleBind->cb.onMsg)
+    {
+        handleBind->cb.onMsg(pSession, type, data ,len, handleBind->arg);
+    }
+}
+
+/**
+ * @brief      websocket on close private callback.
+ * @param[in]  evws : websocket connect context.
+ * @param[in]  arg : A parameter of WSSession pointer type will be passed in.
+ * @return     void
+ */
+void EVHttpServer::onWebSocketCloseCallback(struct evws_connection *evws, void *arg)
+{
+    WSSession * pSession = static_cast<WSSession*>(arg);
+    WSCallBackBind *handleBind = static_cast<WSCallBackBind*>(pSession->m_arg);
+
+    if(handleBind->cb.onClose)
+    {
+        handleBind->cb.onClose(pSession, handleBind->arg);
+    }
+    {
+        EVHttpServer * pThis = handleBind->server;
+        std::lock_guard<std::mutex> locker(pThis->m_wsMutex);
+        pThis->m_wsSessions.erase(pSession);
+        delete pSession;
+    }
+}
+
+/**
+ * @brief      Register the callback handler functions for websocket corresponding to the request path.
+ * @param[in]  path : http request path, for websocket connect.
+ * @param[in]  callback : Callback functions for websocket, see @ref WSCallback for details.
+ * @param[in]  arg : User-defined parameters
+ * @retval     true : Add success
+ * @retval     false : Add failed
+ */
+bool EVHttpServer::addWSHandler(const std::string & path, const WSCallback & callback, void * arg)
+{
+    bool ret = true;
+
+    std::lock_guard<std::mutex> locker(m_wsMutex);
+
+    if(m_wsHandlerMap.find(path) != m_wsHandlerMap.end())
+    {
+        ret = false;
+    }
+    else
+    {
+        WSCallBackBind * pCBBind = new WSCallBackBind();
+        *pCBBind = {callback, arg, this};
+        m_wsHandlerMap.insert(std::make_pair(path, pCBBind));
+    }
+
+    return ret;
+}
+
+/**
+ * @brief      Remove the callback handler for websocket corresponding to the http request path.
+ * @param[in]  path : http request path, for websocket connect.
+ * @retval     true : success
+ * @retval     false : failed
+ */
+bool EVHttpServer::rmWSHandler(const std::string & path)
+{
+    std::lock_guard<std::mutex> locker(m_wsMutex);
+
+    auto iter = m_wsHandlerMap.find(path);
+    if (iter != m_wsHandlerMap.end())
+    {
+        delete iter->second;
+        m_wsHandlerMap.erase(iter);
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * @brief      Send websocket message to every client connected.
+ * @param[in]  msg : message buffer pointer
+ * @param[in]  len : message buffer length
+ * @return     void
+ */
+void EVHttpServer::sendWSBroadcast(const char * msg, size_t len)
+{
+    std::lock_guard<std::mutex> locker(m_wsMutex);
+    for(auto iter = m_wsSessions.begin(); iter != m_wsSessions.end(); ++iter)
+    {
+        evws_send((*iter)->m_evws, msg, len);
+    }
+}
+
+/**
  * @brief      Remove the callback handler corresponding to the http request
  * @param[in]  reqArg : http request parameters, including request method and path, see @ref PathAndMethod for details 
  * @retval     true : success
@@ -310,7 +419,7 @@ bool EVHttpServer::rmHandler(const PathAndMethod & reqArg)
 }
 
 /**
- * @brief      task handler function
+ * @brief      Deal http request task.
  * @param[in]  request : A pointer representing the type of http request in libevent
  * @param[in]  reqArg : http request parameters, including request method and path, see @ref PathAndMethod for details 
  * @param[in]  handleBind : Callback parameters, including callback function and user parameters
@@ -325,6 +434,56 @@ void EVHttpServer::dealTask(struct evhttp_request * request, const PathAndMethod
 
     evbuffer * outputBuf = evhttp_request_get_output_buffer(request);
     evhttp_send_reply(request, res.getCode(), res.getReason(), outputBuf);
+}
+
+/**
+ * @brief      Deal websocket request task.
+ * @param[in]  request : A pointer representing the type of http request in libevent
+ * @param[in]  path : http request path, for websocket connect
+ * @param[in]  handleBind : Callback functions and peremeters bind for request.
+ * @return     void
+ */
+void EVHttpServer::dealWSTask(struct evhttp_request * request, const std::string & path, WSCallBackBind * handleBind)
+{
+    WSSession *pSession = new WSSession();
+    pSession->m_arg = handleBind;
+
+    evws_connection *evws = evws_new_session(request, onWebSocketMsgCallback, pSession, bufferevent_options::BEV_OPT_THREADSAFE);
+    if(nullptr == evws)
+    {
+        delete pSession;
+        return;
+    }
+
+    /* maybe too late to set this value */
+    pSession->m_evws = evws;
+
+    /* set client info */
+    {
+        evutil_socket_t fd =  bufferevent_getfd(evws_connection_get_bufferevent(evws));
+        struct sockaddr_storage addr = {0};
+        socklen_t len = sizeof(addr);
+        getpeername(fd, (struct sockaddr *)&addr, &len);
+
+        char addrBuf[16] = {0};
+        struct sockaddr_in *s = (struct sockaddr_in *)&addr;
+        int port = ntohs(s->sin_port);
+        evutil_inet_ntop(AF_INET, &s->sin_addr, addrBuf, sizeof(addrBuf));
+        pSession->setClientIP(addrBuf);
+        pSession->setClientPort(port);
+    }
+    evws_connection_set_closecb(evws, onWebSocketCloseCallback, pSession);
+
+    EVHttpServer * pThis = handleBind->server;
+    {
+        std::lock_guard<std::mutex> locker(pThis->m_wsMutex);
+        pThis->m_wsSessions.insert(pSession);
+    }
+
+    if(handleBind->cb.onOpen)
+    {
+        handleBind->cb.onOpen(pSession, handleBind->arg);
+    }
 }
 
 /**
@@ -405,6 +564,25 @@ void EVHttpServer::handleHttpEvent(struct evhttp_request * request, void * arg)
             return;
         }
         pThis->m_mutex.unlock();
+
+        /* web socket request */
+        {
+            pThis->m_wsMutex.lock();
+            auto itws = pThis->m_wsHandlerMap.find(reqArg.path);
+            if (itws != pThis->m_wsHandlerMap.end())
+            {
+                WSCallBackBind *cbBind = itws->second;
+                pThis->m_wsMutex.unlock();
+
+                pThis->dealWSTask(request, reqArg.path, cbBind);
+                return;
+            }
+            else
+            {
+                pThis->m_wsMutex.unlock();
+            }
+        }
+
         evhttp_send_reply(request, HTTP_NOTFOUND, "Not found", nullptr);
     }
 }
@@ -480,6 +658,22 @@ EVHttpServer::~EVHttpServer()
     }
 #endif
 
+    /* clear resources for websocket */
+    {
+        std::lock_guard<std::mutex> locker(m_wsMutex);
+        for(auto iter = m_wsSessions.begin(); iter != m_wsSessions.end(); ++iter)
+        {
+            (*iter)->close();
+            delete *iter;
+        }
+        m_wsSessions.clear();
+
+        for(auto iter = m_wsHandlerMap.begin(); iter != m_wsHandlerMap.end(); ++iter)
+        {
+            delete iter->second;
+        }
+        m_wsHandlerMap.clear();
+    }
 }
 
 /**
@@ -997,4 +1191,40 @@ void EVHttpServer::HttpRes::setReason(const std::string & reason)
 const char * EVHttpServer::HttpRes::getReason(void) const
 {
     return m_reason.size() ? m_reason.c_str() : nullptr;
+}
+
+/**
+ * @brief      Send websocket message to this client.
+ * @param[in]  msg : message buffer pointer
+ * @param[in]  len : message buffer length
+ * @return     void
+ */
+void EVHttpServer::WSSession::send(const char * msg, std::size_t len)
+{
+    if(m_evws)
+    {
+        evws_send(m_evws, msg, len);
+    }
+}
+
+/**
+ * @brief      Send websocket message to this client.
+ * @param[in]  msg : message string
+ * @return     void
+ */
+void EVHttpServer::WSSession::send(const std::string & msg)
+{
+    send(msg.c_str(), msg.size());
+}
+
+/**
+ * @brief      Close this websocket session.
+ * @return     void
+ */
+void EVHttpServer::WSSession::close()
+{
+    if(m_evws)
+    {
+        evws_close(m_evws, WS_CR_NORMAL);
+    }
 }

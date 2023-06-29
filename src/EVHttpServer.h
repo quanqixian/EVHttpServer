@@ -3,6 +3,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <set>
 #include <mutex>
 #include <thread>
 #include <list>
@@ -56,11 +57,18 @@ class ThreadPool;
 struct evhttp_request;
 
 /**
- * @brief event_base is a data type in libevent. 
- * In order to minimize compilation dependencies between files, 
+ * @brief event_base is a data type in libevent.
+ * In order to minimize compilation dependencies between files,
  * use declarations instead of include header files.
  */
 struct event_base;
+
+/**
+ * @brief evws_connection is a data type in libevent.
+ * In order to minimize compilation dependencies between files,
+ * use declarations instead of include header files.
+ */
+struct evws_connection;
 
 /**
  * @brief EVHttpServer is just an http server implemented by encapsulating
@@ -161,6 +169,41 @@ public:
     };
 
     using ReqHandler = std::function<void (const HttpReq & req, HttpRes & res, void * arg) >;/* Define http request callback function type */
+
+    /**
+     * @brief Websocket connect session.
+     */
+    class EVHTTPSVR_DLL_DECLARE WSSession
+    {
+    public:
+        void send(const char * msg, std::size_t len);
+        void send(const std::string & msg);
+        void close();
+        std::string getClientIP(){return m_IP;}
+        int getClientPort(){return m_port;}
+    private:
+        WSSession(const WSSession &) = delete;
+        WSSession & operator = (const WSSession &) = delete;
+        WSSession(){};
+        void setClientIP(const std::string & ip){m_IP = ip;}
+        void setClientPort(int port){m_port = port;}
+    private:
+        struct evws_connection *m_evws = nullptr;
+        void * m_arg = nullptr;
+        std::string m_IP;
+        int m_port;
+        friend EVHttpServer;
+    };
+    using WSOnOpenHandler = std::function<void (WSSession * pSession, void * arg)>;
+    using WSOnCloseHandler = std::function<void (WSSession * pSession, void * arg)>;
+    using WSOnMsgHandler = std::function<void (WSSession * pSession, int type, const unsigned char *data, size_t len, void *arg)>;
+    struct WSCallback
+    {
+        WSOnOpenHandler onOpen = nullptr;
+        WSOnCloseHandler onClose = nullptr;
+        WSOnMsgHandler onMsg = nullptr;
+    };
+
 public:
     /**
      * @brief Path and method are used to represent an HTTP request 
@@ -193,6 +236,10 @@ public:
     bool rmHandler(const PathAndMethod & reqArg);
     bool addRegHandler(const PathAndMethod & reqArg, const ReqHandler & handler, void * arg = nullptr);
     bool rmRegHandler(const PathAndMethod & reqArg);
+public:
+    bool addWSHandler(const std::string & path, const WSCallback & callback, void * arg = nullptr);
+    bool rmWSHandler(const std::string & path);
+    void sendWSBroadcast(const char * msg, size_t len);
 private:
     bool deInit();
     static void handleHttpEvent(struct evhttp_request * request, void * arg);
@@ -211,6 +258,12 @@ private:
         ReqHandler func;
         void * arg;
     };
+    struct WSCallBackBind
+    {
+        WSCallback cb;
+        void * arg;
+        EVHttpServer * server;
+    };
     struct RegNode
     {
         PathAndMethod reqArg;
@@ -223,6 +276,9 @@ private:
     };
 private:
     static void dealTask(struct evhttp_request * request, const PathAndMethod & reqArg, const CallBackBind & handleBind);
+    static void dealWSTask(struct evhttp_request * request, const std::string & path, WSCallBackBind * handleBind);
+    static void onWebSocketCloseCallback(struct evws_connection *evws, void *arg);
+    static void onWebSocketMsgCallback(struct evws_connection *evws, int type, const unsigned char *data, size_t len, void *arg);
 private:
     std::thread * m_thread = nullptr;       /* dispatch thread */
     volatile bool m_isInited = false;       /* initialized flag */
@@ -235,6 +291,10 @@ private:
     ThreadPool * m_threadPool = nullptr;
     EVHttpServer(const EVHttpServer &) = delete;
     EVHttpServer & operator = (const EVHttpServer &) = delete;
+private:
+    std::mutex m_wsMutex;
+    std::unordered_map<std::string, WSCallBackBind*> m_wsHandlerMap;
+    std::set<WSSession *> m_wsSessions;
 };
 
 #endif
