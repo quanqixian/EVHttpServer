@@ -658,16 +658,11 @@ EVHttpServer::~EVHttpServer()
     }
 #endif
 
-    /* clear resources for websocket */
+    /* Release resources for websocket.
+     * m_wsSessions will be release in callback, no need realse here
+     */
     {
         std::lock_guard<std::mutex> locker(m_wsMutex);
-        for(auto iter = m_wsSessions.begin(); iter != m_wsSessions.end(); ++iter)
-        {
-            (*iter)->close();
-            delete *iter;
-        }
-        m_wsSessions.clear();
-
         for(auto iter = m_wsHandlerMap.begin(); iter != m_wsHandlerMap.end(); ++iter)
         {
             delete iter->second;
