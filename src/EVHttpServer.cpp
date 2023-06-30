@@ -394,7 +394,7 @@ void EVHttpServer::sendWSBroadcast(const char * msg, size_t len)
     std::lock_guard<std::mutex> locker(m_wsMutex);
     for(auto iter = m_wsSessions.begin(); iter != m_wsSessions.end(); ++iter)
     {
-        evws_send((*iter)->m_evws, msg, len);
+        (*iter)->send(msg, len);
     }
 }
 
@@ -667,7 +667,6 @@ EVHttpServer::~EVHttpServer()
         {
             delete iter->second;
         }
-        m_wsHandlerMap.clear();
     }
 }
 
