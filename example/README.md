@@ -9,4 +9,5 @@
 | [example05](./example05/example05.cpp) | Example of using lambda as request callback|
 | [example06](./example06/README.md) | A simple web configure page|
 | [example07](./example07/CMakeLists.txt) | A copy of example01, but when compiling with dynamic library |
+| [example08](./example08/README.md)     | A simple websocket demo                  |
 
