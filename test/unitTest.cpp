@@ -3,6 +3,7 @@
 #include "testHttpRes.h"
 #include "testRegexMatch.h"
 #include "testLambda.h"
+#include "testWebSocket.h"
 
 int main(int argc, char **argv)
 {

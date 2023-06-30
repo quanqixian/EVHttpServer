@@ -565,7 +565,8 @@ void EVHttpServer::handleHttpEvent(struct evhttp_request * request, void * arg)
         }
         pThis->m_mutex.unlock();
 
-        /* web socket request */
+        /* For web socket request */
+        if(reqArg.method == EVHttpServer::ReqType::REQ_GET)
         {
             pThis->m_wsMutex.lock();
             auto itws = pThis->m_wsHandlerMap.find(reqArg.path);
