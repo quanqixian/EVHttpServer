@@ -322,7 +322,9 @@ void EVHttpServer::dealTask(struct evhttp_request * request, const PathAndMethod
     HttpRes res(request);
 
     handleBind.func(req, res, handleBind.arg);
-    evhttp_send_reply(request, res.getCode(), res.getReason(), nullptr);
+    if (!res.replyDone()) {
+        evhttp_send_reply(request, res.getCode(), res.getReason(), nullptr);
+    }
 }
 
 /**
@@ -995,4 +997,24 @@ void EVHttpServer::HttpRes::setReason(const std::string & reason)
 const char * EVHttpServer::HttpRes::getReason(void) const
 {
     return m_reason.size() ? m_reason.c_str() : nullptr;
+}
+
+void EVHttpServer::HttpRes::start() {
+    evhttp_send_reply_start(m_request, m_code, m_reason.c_str());
+}
+
+void EVHttpServer::HttpRes::send(const void *p, int size) {
+    evbuffer * outputBuf = evhttp_request_get_output_buffer(m_request);
+    evbuffer_add(outputBuf, p, size);
+    // argument 2 databuf should not be nullptr.
+    evhttp_send_reply_chunk(m_request, outputBuf);
+}
+
+void EVHttpServer::HttpRes::end() {
+    evhttp_send_reply_end(m_request);
+    m_replyDone = true;
+}
+
+bool EVHttpServer::HttpRes::isConnect() {
+    return (nullptr != evhttp_request_get_connection(m_request));
 }

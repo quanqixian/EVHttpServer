@@ -13,7 +13,6 @@ set(EXAMPLES
     example03
     example04
     example05
-    example06
 )
 
 set(EVHTTP_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
@@ -33,8 +32,7 @@ endforeach()
 
 add_custom_target(examples ALL DEPENDS ${EXAMPLES})
 
+add_subdirectory(example06)
 add_subdirectory(example07)
+add_subdirectory(example08)
 
-message(NOTICE "Copy the html files used in the example to the build directory...")
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/example06/html/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/html)
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/example06/html" TYPE BIN)

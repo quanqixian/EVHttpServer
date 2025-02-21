@@ -145,6 +145,11 @@ public:
 
         void setCode(const int & code);
         void setReason(const std::string & reason);
+        void start();
+        void send(const void *p, int size);
+        void end();
+        bool isConnect();
+
     private:
         HttpRes(const HttpRes &) = delete;
         HttpRes & operator = (const HttpRes &) = delete;
@@ -152,9 +157,14 @@ public:
     private:
         int getCode(void) const;
         const char * getReason(void) const;
+        bool replyDone() const {
+            return m_replyDone;
+        }
+
     private:
         int m_code = 200;
         std::string m_reason;
+        bool m_replyDone = false;
         struct evhttp_request * m_request = nullptr;
         bool m_initBody = false;
         friend EVHttpServer;
