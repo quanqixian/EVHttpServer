@@ -322,9 +322,7 @@ void EVHttpServer::dealTask(struct evhttp_request * request, const PathAndMethod
     HttpRes res(request);
 
     handleBind.func(req, res, handleBind.arg);
-
-    evbuffer * outputBuf = evhttp_request_get_output_buffer(request);
-    evhttp_send_reply(request, res.getCode(), res.getReason(), outputBuf);
+    evhttp_send_reply(request, res.getCode(), res.getReason(), nullptr);
 }
 
 /**
